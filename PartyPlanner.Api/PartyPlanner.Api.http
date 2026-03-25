@@ -1,6 +1,0 @@
-@PartyPlanner.Api_HostAddress = http://localhost:5112
-
-GET {{PartyPlanner.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

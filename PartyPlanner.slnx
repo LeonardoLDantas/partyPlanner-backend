@@ -1,5 +1,9 @@
 <Solution>
-  <Folder Name="/backend/">
-    <Project Path="backend/PartyPlanner.Api/PartyPlanner.Api.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/PartyPlanner.Application/PartyPlanner.Application.csproj" />
+    <Project Path="src/PartyPlanner.Common/PartyPlanner.Common.csproj" />
+    <Project Path="src/PartyPlanner.Core/PartyPlanner.Core.csproj" />
+    <Project Path="src/PartyPlanner.Infrastructure/PartyPlanner.Infrastructure.csproj" />
+    <Project Path="src/PartyPlanner.WebApi/PartyPlanner.WebApi.csproj" />
   </Folder>
 </Solution>
