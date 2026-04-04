@@ -7,18 +7,20 @@ namespace PartyPlanner.Infrastructure.Repository;
 
 public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRepository
 {
-    public async Task<IReadOnlyCollection<Party>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<Party>> GetAllAsync(Guid ownerUserId, CancellationToken cancellationToken = default)
     {
         return await dbContext.Parties
+            .Where(party => party.OwnerUserId == ownerUserId)
             .Include(party => party.Tasks)
             .Include(party => party.Guests)
             .Include(party => party.Budget.Items)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Party?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Party?> GetByIdAsync(Guid id, Guid ownerUserId, CancellationToken cancellationToken = default)
     {
         return await dbContext.Parties
+            .Where(party => party.OwnerUserId == ownerUserId)
             .Include(party => party.Tasks)
             .Include(party => party.Guests)
             .Include(party => party.Budget.Items)

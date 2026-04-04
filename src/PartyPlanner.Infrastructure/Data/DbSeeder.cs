@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PartyPlanner.Core.Entities;
+using PartyPlanner.Infrastructure.Security;
 
 namespace PartyPlanner.Infrastructure.Data;
 
@@ -9,6 +10,25 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
     {
         await dbContext.Database.MigrateAsync(cancellationToken);
 
+        var demoUserId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        var demoUser = await dbContext.Users
+            .FirstOrDefaultAsync(user => user.Id == demoUserId, cancellationToken);
+
+        if (demoUser is null)
+        {
+            var passwordHasher = new Pbkdf2PasswordHasher();
+            demoUser = new User(
+                demoUserId,
+                "Demo Party Planner",
+                "demo@partyplanner.app",
+                passwordHasher.Hash("Party123!"),
+                true
+            );
+
+            await dbContext.Users.AddAsync(demoUser, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
         if (await dbContext.Parties.AnyAsync(cancellationToken))
         {
             return;
@@ -16,6 +36,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
 
         var party = new Party(
             Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            demoUser.Id,
             "Aniversario da Sofia",
             "Aniversario",
             "12 de abril de 2026",

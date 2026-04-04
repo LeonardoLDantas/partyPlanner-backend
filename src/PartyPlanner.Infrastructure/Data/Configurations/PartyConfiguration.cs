@@ -11,6 +11,7 @@ public sealed class PartyConfiguration : IEntityTypeConfiguration<Party>
         builder.ToTable("Parties");
         builder.HasKey(party => party.Id);
 
+        builder.Property(party => party.OwnerUserId).IsRequired();
         builder.Property(party => party.Name).HasMaxLength(150).IsRequired();
         builder.Property(party => party.Category).HasMaxLength(80).IsRequired();
         builder.Property(party => party.Date).HasMaxLength(80).IsRequired();

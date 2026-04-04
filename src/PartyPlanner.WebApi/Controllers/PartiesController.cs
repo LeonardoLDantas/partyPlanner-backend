@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PartyPlanner.Application.Interface;
 using PartyPlanner.Core.DTO.Requests;
@@ -5,20 +7,27 @@ using PartyPlanner.Core.DTO.Requests;
 namespace PartyPlanner.WebApi.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public sealed class PartiesController(IPartyService partyService) : ControllerBase
 {
+    private Guid GetUserId()
+    {
+        var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.Parse(claimValue!);
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var parties = await partyService.GetAllAsync(cancellationToken);
+        var parties = await partyService.GetAllAsync(GetUserId(), cancellationToken);
         return Ok(parties);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var party = await partyService.GetByIdAsync(id, cancellationToken);
+        var party = await partyService.GetByIdAsync(id, GetUserId(), cancellationToken);
         return party is null ? NotFound() : Ok(party);
     }
 
@@ -31,7 +40,7 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
             return ValidationProblem(ModelState);
         }
 
-        var party = await partyService.CreateAsync(request, cancellationToken);
+        var party = await partyService.CreateAsync(GetUserId(), request, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = party.Id }, party);
     }
 
@@ -44,14 +53,14 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
             return ValidationProblem(ModelState);
         }
 
-        var party = await partyService.AddTaskAsync(partyId, request, cancellationToken);
+        var party = await partyService.AddTaskAsync(GetUserId(), partyId, request, cancellationToken);
         return party is null ? NotFound() : Ok(party);
     }
 
     [HttpPatch("{partyId:guid}/tasks/{taskId:guid}/toggle")]
     public async Task<IActionResult> ToggleTask(Guid partyId, Guid taskId, CancellationToken cancellationToken)
     {
-        var party = await partyService.ToggleTaskAsync(partyId, taskId, cancellationToken);
+        var party = await partyService.ToggleTaskAsync(GetUserId(), partyId, taskId, cancellationToken);
         return party is null ? NotFound() : Ok(party);
     }
 
@@ -64,7 +73,7 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
             return ValidationProblem(ModelState);
         }
 
-        var party = await partyService.AddGuestAsync(partyId, request, cancellationToken);
+        var party = await partyService.AddGuestAsync(GetUserId(), partyId, request, cancellationToken);
         return party is null ? NotFound() : Ok(party);
     }
 
@@ -77,7 +86,7 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
             return ValidationProblem(ModelState);
         }
 
-        var party = await partyService.AddBudgetItemAsync(partyId, request, cancellationToken);
+        var party = await partyService.AddBudgetItemAsync(GetUserId(), partyId, request, cancellationToken);
         return party is null ? NotFound() : Ok(party);
     }
 }

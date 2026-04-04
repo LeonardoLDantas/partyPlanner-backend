@@ -9,11 +9,15 @@ public sealed class PartyPlannerDbContext(DbContextOptions<PartyPlannerDbContext
     public DbSet<Party> Parties => Set<Party>();
     public DbSet<PartyTask> Tasks => Set<PartyTask>();
     public DbSet<Guest> Guests => Set<Guest>();
+    public DbSet<User> Users => Set<User>();
+    public DbSet<UserExternalLogin> UserExternalLogins => Set<UserExternalLogin>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new PartyConfiguration());
         modelBuilder.ApplyConfiguration(new PartyTaskConfiguration());
         modelBuilder.ApplyConfiguration(new GuestConfiguration());
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new UserExternalLoginConfiguration());
     }
 }

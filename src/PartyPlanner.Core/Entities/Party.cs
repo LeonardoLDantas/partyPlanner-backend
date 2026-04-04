@@ -11,9 +11,10 @@ public sealed class Party
         Budget = null!;
     }
 
-    public Party(Guid id, string name, string category, string date, string location, Budget budget)
+    public Party(Guid id, Guid ownerUserId, string name, string category, string date, string location, Budget budget)
     {
         Id = id;
+        OwnerUserId = ownerUserId;
         Name = name;
         Category = category;
         Date = date;
@@ -22,6 +23,7 @@ public sealed class Party
     }
 
     public Guid Id { get; private set; }
+    public Guid OwnerUserId { get; private set; }
     public string Name { get; private set; }
     public string Category { get; private set; }
     public string Date { get; private set; }
@@ -29,6 +31,7 @@ public sealed class Party
     public List<PartyTask> Tasks { get; private set; } = [];
     public List<Guest> Guests { get; private set; } = [];
     public Budget Budget { get; private set; }
+    public User Owner { get; private set; } = null!;
 
     public void AddTask(PartyTask task)
     {
