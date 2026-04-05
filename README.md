@@ -36,7 +36,7 @@ Ao executar em `Development`, o navegador abre automaticamente no Swagger:
 http://localhost:5112/swagger
 ```
 
-## SQL Server com Docker
+## PostgreSQL com Docker
 
 Para subir o banco:
 
@@ -47,15 +47,15 @@ docker compose up -d
 Configuracao padrao:
 
 - host: `localhost`
-- porta: `14333`
-- usuario: `sa`
-- senha: `PartyPlanner!2026`
-- database: `PartyPlannerDb`
+- porta: `5433`
+- usuario: `postgres`
+- senha: `postgres`
+- database: `partyplannerdb`
 
 String de conexao:
 
 ```text
-Server=localhost,14333;Database=PartyPlannerDb;User Id=sa;Password=PartyPlanner!2026;TrustServerCertificate=True;
+Host=localhost;Port=5433;Database=partyplannerdb;Username=postgres;Password=postgres;
 ```
 
 ## Entity Framework

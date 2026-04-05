@@ -43,9 +43,9 @@ public sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Par
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
         var optionsBuilder = new DbContextOptionsBuilder<PartyPlannerDbContext>();
-        optionsBuilder.UseSqlServer(
+        optionsBuilder.UseNpgsql(
             connectionString,
-            sqlServer => sqlServer.MigrationsAssembly(typeof(PartyPlannerDbContext).Assembly.FullName)
+            npgsql => npgsql.MigrationsAssembly(typeof(PartyPlannerDbContext).Assembly.FullName)
         );
 
         return new PartyPlannerDbContext(optionsBuilder.Options);
