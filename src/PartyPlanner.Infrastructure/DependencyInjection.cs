@@ -19,6 +19,7 @@ public static class DependencyInjection
             ));
 
         services.AddScoped<IAuthRepository, AuthRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<IPartyRepository, PartyRepository>();
         services.AddScoped<IPasswordHasher, Pbkdf2PasswordHasher>();
         services.AddScoped<ITokenService, JwtTokenService>();

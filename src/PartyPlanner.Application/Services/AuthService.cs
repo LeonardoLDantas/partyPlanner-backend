@@ -10,7 +10,8 @@ public sealed class AuthService(
     IAuthRepository authRepository,
     IPasswordHasher passwordHasher,
     ITokenService tokenService,
-    IGoogleTokenVerifier googleTokenVerifier) : IAuthService
+    IGoogleTokenVerifier googleTokenVerifier,
+    INotificationService notificationService) : IAuthService
 {
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
@@ -31,6 +32,12 @@ public sealed class AuthService(
 
         await authRepository.AddUserAsync(user, cancellationToken);
         await authRepository.SaveChangesAsync(cancellationToken);
+        await notificationService.CreateAsync(
+            user.Id,
+            "Conta criada",
+            "Sua conta foi criada com sucesso. Bem-vindo ao Party Planner.",
+            "account",
+            cancellationToken);
 
         return tokenService.Create(user);
     }
@@ -91,6 +98,7 @@ public sealed class AuthService(
         }
 
         await authRepository.SaveChangesAsync(cancellationToken);
+
         return tokenService.Create(user);
     }
 

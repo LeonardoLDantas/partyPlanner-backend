@@ -6,7 +6,9 @@ using PartyPlanner.Core.Extensions;
 
 namespace PartyPlanner.Application.Services;
 
-public sealed class PartyService(IPartyRepository partyRepository) : IPartyService
+public sealed class PartyService(
+    IPartyRepository partyRepository,
+    INotificationService notificationService) : IPartyService
 {
     public async Task<IReadOnlyCollection<PartyResponse>> GetAllAsync(Guid ownerUserId, CancellationToken cancellationToken = default)
     {
@@ -34,6 +36,12 @@ public sealed class PartyService(IPartyRepository partyRepository) : IPartyServi
 
         await partyRepository.AddAsync(party, cancellationToken);
         await partyRepository.SaveChangesAsync(cancellationToken);
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Nova festa criada",
+            $"A festa \"{party.Name}\" foi criada com sucesso.",
+            "party",
+            cancellationToken);
         return party.ToResponse();
     }
 
@@ -53,6 +61,12 @@ public sealed class PartyService(IPartyRepository partyRepository) : IPartyServi
         ));
 
         await partyRepository.SaveChangesAsync(cancellationToken);
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Tarefa adicionada",
+            $"A tarefa \"{request.Title.Trim()}\" foi adicionada em \"{party.Name}\".",
+            "task",
+            cancellationToken);
         return party.ToResponse();
     }
 
@@ -65,6 +79,12 @@ public sealed class PartyService(IPartyRepository partyRepository) : IPartyServi
         }
 
         await partyRepository.SaveChangesAsync(cancellationToken);
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Tarefa atualizada",
+            "O status de uma tarefa foi atualizado.",
+            "task",
+            cancellationToken);
         return party.ToResponse();
     }
 
@@ -84,6 +104,12 @@ public sealed class PartyService(IPartyRepository partyRepository) : IPartyServi
         ));
 
         await partyRepository.SaveChangesAsync(cancellationToken);
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Convidado adicionado",
+            $"\"{request.Name.Trim()}\" foi adicionado a lista de convidados.",
+            "guest",
+            cancellationToken);
         return party.ToResponse();
     }
 
@@ -103,6 +129,12 @@ public sealed class PartyService(IPartyRepository partyRepository) : IPartyServi
         ));
 
         await partyRepository.SaveChangesAsync(cancellationToken);
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Despesa adicionada",
+            $"A despesa \"{request.Label.Trim()}\" foi registrada no evento \"{party.Name}\".",
+            "budget",
+            cancellationToken);
         return party.ToResponse();
     }
 }
