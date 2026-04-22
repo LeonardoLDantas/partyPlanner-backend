@@ -2,6 +2,7 @@ using PartyPlanner.Application.Interface;
 using PartyPlanner.Core.DTO.Requests;
 using PartyPlanner.Core.DTO.Responses;
 using PartyPlanner.Core.Entities;
+using PartyPlanner.Core.Enums;
 using PartyPlanner.Core.Extensions;
 
 namespace PartyPlanner.Application.Services;
@@ -10,6 +11,8 @@ public sealed class PartyService(
     IPartyRepository partyRepository,
     INotificationService notificationService) : IPartyService
 {
+    private static readonly string[] BusinessTimeZoneIds = ["America/Sao_Paulo", "E. South America Standard Time"];
+
     public async Task<IReadOnlyCollection<PartyResponse>> GetAllAsync(Guid ownerUserId, CancellationToken cancellationToken = default)
     {
         var parties = await partyRepository.GetAllAsync(ownerUserId, cancellationToken);
@@ -28,7 +31,7 @@ public sealed class PartyService(
             Guid.NewGuid(),
             ownerUserId,
             request.Name.Trim(),
-            string.IsNullOrWhiteSpace(request.Category) ? "Evento" : request.Category.Trim(),
+            request.Category ?? PartyCategory.Outros,
             string.IsNullOrWhiteSpace(request.Date) ? "Data a definir" : request.Date.Trim(),
             string.IsNullOrWhiteSpace(request.Location) ? "Local a definir" : request.Location.Trim(),
             new Budget(request.EstimatedBudget, 0, [])
@@ -45,6 +48,32 @@ public sealed class PartyService(
         return party.ToResponse();
     }
 
+    public async Task<PartyResponse?> UpdateAsync(Guid ownerUserId, Guid partyId, UpdatePartyRequest request, CancellationToken cancellationToken = default)
+    {
+        var party = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        if (party is null)
+        {
+            return null;
+        }
+
+        party.EnsureEditableOn(GetCurrentBusinessDate());
+        party.UpdateDetails(
+            request.Name.Trim(),
+            request.Category ?? PartyCategory.Outros,
+            string.IsNullOrWhiteSpace(request.Date) ? "Data a definir" : request.Date.Trim(),
+            string.IsNullOrWhiteSpace(request.Location) ? "Local a definir" : request.Location.Trim(),
+            request.EstimatedBudget);
+
+        await partyRepository.SaveChangesAsync(cancellationToken);
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Festa atualizada",
+            $"A festa \"{party.Name}\" foi atualizada pelo usuario criador.",
+            "party",
+            cancellationToken);
+        return party.ToResponse();
+    }
+
     public async Task<PartyResponse?> AddTaskAsync(Guid ownerUserId, Guid partyId, CreateTaskRequest request, CancellationToken cancellationToken = default)
     {
         var party = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
@@ -52,6 +81,8 @@ public sealed class PartyService(
         {
             return null;
         }
+
+        party.EnsureEditableOn(GetCurrentBusinessDate());
 
         party.AddTask(new PartyTask(
             Guid.NewGuid(),
@@ -73,7 +104,13 @@ public sealed class PartyService(
     public async Task<PartyResponse?> ToggleTaskAsync(Guid ownerUserId, Guid partyId, Guid taskId, CancellationToken cancellationToken = default)
     {
         var party = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
-        if (party is null || !party.ToggleTask(taskId))
+        if (party is null)
+        {
+            return null;
+        }
+
+        party.EnsureEditableOn(GetCurrentBusinessDate());
+        if (!party.ToggleTask(taskId))
         {
             return null;
         }
@@ -95,6 +132,8 @@ public sealed class PartyService(
         {
             return null;
         }
+
+        party.EnsureEditableOn(GetCurrentBusinessDate());
 
         party.AddGuest(new Guest(
             Guid.NewGuid(),
@@ -121,6 +160,8 @@ public sealed class PartyService(
             return null;
         }
 
+        party.EnsureEditableOn(GetCurrentBusinessDate());
+
         party.AddBudgetItem(new BudgetItem(
             Guid.NewGuid(),
             request.Label.Trim(),
@@ -136,5 +177,25 @@ public sealed class PartyService(
             "budget",
             cancellationToken);
         return party.ToResponse();
+    }
+
+    private static DateOnly GetCurrentBusinessDate()
+    {
+        foreach (var timeZoneId in BusinessTimeZoneIds)
+        {
+            try
+            {
+                var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+                return DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone));
+            }
+            catch (TimeZoneNotFoundException)
+            {
+            }
+            catch (InvalidTimeZoneException)
+            {
+            }
+        }
+
+        return DateOnly.FromDateTime(DateTime.UtcNow);
     }
 }

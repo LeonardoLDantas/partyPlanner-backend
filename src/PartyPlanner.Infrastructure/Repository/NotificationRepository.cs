@@ -23,6 +23,13 @@ public sealed class NotificationRepository(PartyPlannerDbContext dbContext) : IN
                 cancellationToken);
     }
 
+    public Task<int> DeleteAllByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return dbContext.AppNotifications
+            .Where(notification => notification.UserId == userId)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
+
     public Task AddAsync(AppNotification notification, CancellationToken cancellationToken = default)
     {
         return dbContext.AppNotifications.AddAsync(notification, cancellationToken).AsTask();

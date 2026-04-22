@@ -44,6 +44,11 @@ public sealed class NotificationService(INotificationRepository notificationRepo
         return unreadNotifications.Length;
     }
 
+    public Task<int> ClearAllAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return notificationRepository.DeleteAllByUserIdAsync(userId, cancellationToken);
+    }
+
     public async Task CreateAsync(Guid userId, string title, string message, string type, CancellationToken cancellationToken = default)
     {
         var notification = new AppNotification(

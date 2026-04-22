@@ -36,4 +36,11 @@ public sealed class NotificationsController(INotificationService notificationSer
         var total = await notificationService.MarkAllAsReadAsync(GetUserId(), cancellationToken);
         return Ok(new { updated = total });
     }
+
+    [HttpDelete]
+    public async Task<IActionResult> ClearAll(CancellationToken cancellationToken)
+    {
+        var total = await notificationService.ClearAllAsync(GetUserId(), cancellationToken);
+        return Ok(new { deleted = total });
+    }
 }
