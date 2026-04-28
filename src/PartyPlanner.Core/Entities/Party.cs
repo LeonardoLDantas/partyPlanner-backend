@@ -10,18 +10,30 @@ public sealed class Party
         Name = string.Empty;
         Category = PartyCategory.Outros;
         Date = string.Empty;
+        Time = string.Empty;
         Location = string.Empty;
         Budget = null!;
     }
 
-    public Party(Guid id, Guid ownerUserId, string name, PartyCategory category, string date, string location, Budget budget)
+    public Party(
+        Guid id,
+        Guid ownerUserId,
+        string name,
+        PartyCategory category,
+        string date,
+        string time,
+        string location,
+        int expectedGuests,
+        Budget budget)
     {
         Id = id;
         OwnerUserId = ownerUserId;
         Name = name;
         Category = category;
         Date = date;
+        Time = time;
         Location = location;
+        ExpectedGuests = expectedGuests;
         Budget = budget;
     }
 
@@ -30,7 +42,9 @@ public sealed class Party
     public string Name { get; private set; }
     public PartyCategory Category { get; private set; }
     public string Date { get; private set; }
+    public string Time { get; private set; }
     public string Location { get; private set; }
+    public int ExpectedGuests { get; private set; }
     public List<PartyTask> Tasks { get; private set; } = [];
     public List<Guest> Guests { get; private set; } = [];
     public Budget Budget { get; private set; }
@@ -63,12 +77,21 @@ public sealed class Party
         Budget.AddItem(item);
     }
 
-    public void UpdateDetails(string name, PartyCategory category, string date, string location, decimal estimatedBudget)
+    public void UpdateDetails(
+        string name,
+        PartyCategory category,
+        string date,
+        string time,
+        string location,
+        int expectedGuests,
+        decimal estimatedBudget)
     {
         Name = name;
         Category = category;
         Date = date;
+        Time = time;
         Location = location;
+        ExpectedGuests = expectedGuests;
         Budget.UpdateEstimated(estimatedBudget);
     }
 

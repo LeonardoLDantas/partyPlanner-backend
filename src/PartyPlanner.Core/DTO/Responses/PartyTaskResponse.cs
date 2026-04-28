@@ -4,5 +4,7 @@ public sealed record PartyTaskResponse(
     Guid Id,
     string Title,
     string Assignee,
+    string DueDate,
+    string Status,
     bool Done
 );

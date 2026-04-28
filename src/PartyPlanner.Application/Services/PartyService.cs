@@ -33,7 +33,9 @@ public sealed class PartyService(
             request.Name.Trim(),
             request.Category ?? PartyCategory.Outros,
             string.IsNullOrWhiteSpace(request.Date) ? "Data a definir" : request.Date.Trim(),
+            string.IsNullOrWhiteSpace(request.Time) ? "19:00" : request.Time.Trim(),
             string.IsNullOrWhiteSpace(request.Location) ? "Local a definir" : request.Location.Trim(),
+            Math.Max(request.ExpectedGuests ?? 0, 0),
             new Budget(request.EstimatedBudget, 0, [])
         );
 
@@ -61,7 +63,9 @@ public sealed class PartyService(
             request.Name.Trim(),
             request.Category ?? PartyCategory.Outros,
             string.IsNullOrWhiteSpace(request.Date) ? "Data a definir" : request.Date.Trim(),
+            string.IsNullOrWhiteSpace(request.Time) ? "19:00" : request.Time.Trim(),
             string.IsNullOrWhiteSpace(request.Location) ? "Local a definir" : request.Location.Trim(),
+            Math.Max(request.ExpectedGuests ?? party.ExpectedGuests, 0),
             request.EstimatedBudget);
 
         await partyRepository.SaveChangesAsync(cancellationToken);
@@ -88,6 +92,8 @@ public sealed class PartyService(
             Guid.NewGuid(),
             request.Title.Trim(),
             string.IsNullOrWhiteSpace(request.Assignee) ? "Sem responsavel" : request.Assignee.Trim(),
+            string.IsNullOrWhiteSpace(request.DueDate) ? party.Date : request.DueDate.Trim(),
+            string.IsNullOrWhiteSpace(request.Status) ? "Pendente" : request.Status.Trim(),
             false
         ));
 

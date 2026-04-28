@@ -15,10 +15,12 @@ public static class PartyMappingExtensions
             party.Name,
             party.Category,
             party.Date,
+            party.Time,
             party.Location,
+            party.ExpectedGuests,
             party.CanBeEditedOn(GetCurrentBusinessDate()),
             party.Tasks
-                .Select(task => new PartyTaskResponse(task.Id, task.Title, task.Assignee, task.Done))
+                .Select(task => new PartyTaskResponse(task.Id, task.Title, task.Assignee, task.DueDate, task.Status, task.Done))
                 .ToArray(),
             party.Guests
                 .Select(guest => new GuestResponse(guest.Id, guest.Name, guest.Group, guest.Status))

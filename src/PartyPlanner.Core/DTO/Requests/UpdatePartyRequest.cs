@@ -6,6 +6,8 @@ public sealed record UpdatePartyRequest(
     string Name,
     PartyCategory? Category,
     string? Date,
+    string? Time,
     string? Location,
+    int? ExpectedGuests,
     decimal EstimatedBudget
 );
