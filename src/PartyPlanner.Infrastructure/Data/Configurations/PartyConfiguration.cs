@@ -13,9 +13,11 @@ public sealed class PartyConfiguration : IEntityTypeConfiguration<Party>
 
         builder.Property(party => party.OwnerUserId).IsRequired();
         builder.Property(party => party.Name).HasMaxLength(150).IsRequired();
-        builder.Property(party => party.Category).HasMaxLength(80).IsRequired();
+        builder.Property(party => party.Category).HasConversion<int>().IsRequired();
         builder.Property(party => party.Date).HasMaxLength(80).IsRequired();
+        builder.Property(party => party.Time).HasMaxLength(20).IsRequired();
         builder.Property(party => party.Location).HasMaxLength(150).IsRequired();
+        builder.Property(party => party.ExpectedGuests).IsRequired();
 
         builder.HasMany(party => party.Tasks)
             .WithOne()

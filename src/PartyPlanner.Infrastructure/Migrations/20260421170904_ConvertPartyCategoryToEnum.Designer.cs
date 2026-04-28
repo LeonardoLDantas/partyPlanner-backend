@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PartyPlanner.Infrastructure.Data;
@@ -11,9 +12,11 @@ using PartyPlanner.Infrastructure.Data;
 namespace PartyPlanner.Infrastructure.Migrations
 {
     [DbContext(typeof(PartyPlannerDbContext))]
-    partial class PartyPlannerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260421170904_ConvertPartyCategoryToEnum")]
+    partial class ConvertPartyCategoryToEnum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -104,9 +107,6 @@ namespace PartyPlanner.Infrastructure.Migrations
                         .HasMaxLength(80)
                         .HasColumnType("character varying(80)");
 
-                    b.Property<int>("ExpectedGuests")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -119,11 +119,6 @@ namespace PartyPlanner.Infrastructure.Migrations
 
                     b.Property<Guid>("OwnerUserId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Time")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
 
@@ -146,18 +141,8 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.Property<bool>("Done")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("DueDate")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
-
                     b.Property<Guid?>("PartyId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
 
                     b.Property<string>("Title")
                         .IsRequired()

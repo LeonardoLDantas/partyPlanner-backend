@@ -44,6 +44,27 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
         return CreatedAtAction(nameof(GetById), new { id = party.Id }, party);
     }
 
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePartyRequest request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            ModelState.AddModelError(nameof(request.Name), "Name is required.");
+            return ValidationProblem(ModelState);
+        }
+
+        try
+        {
+            var party = await partyService.UpdateAsync(GetUserId(), id, request, cancellationToken);
+            return party is null ? NotFound() : Ok(party);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ModelState.AddModelError(nameof(id), exception.Message);
+            return ValidationProblem(ModelState);
+        }
+    }
+
     [HttpPost("{partyId:guid}/tasks")]
     public async Task<IActionResult> AddTask(Guid partyId, [FromBody] CreateTaskRequest request, CancellationToken cancellationToken)
     {
@@ -53,15 +74,31 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
             return ValidationProblem(ModelState);
         }
 
-        var party = await partyService.AddTaskAsync(GetUserId(), partyId, request, cancellationToken);
-        return party is null ? NotFound() : Ok(party);
+        try
+        {
+            var party = await partyService.AddTaskAsync(GetUserId(), partyId, request, cancellationToken);
+            return party is null ? NotFound() : Ok(party);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ModelState.AddModelError(nameof(partyId), exception.Message);
+            return ValidationProblem(ModelState);
+        }
     }
 
     [HttpPatch("{partyId:guid}/tasks/{taskId:guid}/toggle")]
     public async Task<IActionResult> ToggleTask(Guid partyId, Guid taskId, CancellationToken cancellationToken)
     {
-        var party = await partyService.ToggleTaskAsync(GetUserId(), partyId, taskId, cancellationToken);
-        return party is null ? NotFound() : Ok(party);
+        try
+        {
+            var party = await partyService.ToggleTaskAsync(GetUserId(), partyId, taskId, cancellationToken);
+            return party is null ? NotFound() : Ok(party);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ModelState.AddModelError(nameof(partyId), exception.Message);
+            return ValidationProblem(ModelState);
+        }
     }
 
     [HttpPost("{partyId:guid}/guests")]
@@ -73,8 +110,16 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
             return ValidationProblem(ModelState);
         }
 
-        var party = await partyService.AddGuestAsync(GetUserId(), partyId, request, cancellationToken);
-        return party is null ? NotFound() : Ok(party);
+        try
+        {
+            var party = await partyService.AddGuestAsync(GetUserId(), partyId, request, cancellationToken);
+            return party is null ? NotFound() : Ok(party);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ModelState.AddModelError(nameof(partyId), exception.Message);
+            return ValidationProblem(ModelState);
+        }
     }
 
     [HttpPost("{partyId:guid}/budget-items")]
@@ -86,7 +131,15 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
             return ValidationProblem(ModelState);
         }
 
-        var party = await partyService.AddBudgetItemAsync(GetUserId(), partyId, request, cancellationToken);
-        return party is null ? NotFound() : Ok(party);
+        try
+        {
+            var party = await partyService.AddBudgetItemAsync(GetUserId(), partyId, request, cancellationToken);
+            return party is null ? NotFound() : Ok(party);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ModelState.AddModelError(nameof(partyId), exception.Message);
+            return ValidationProblem(ModelState);
+        }
     }
 }

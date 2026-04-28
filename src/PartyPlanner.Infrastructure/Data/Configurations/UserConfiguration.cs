@@ -26,5 +26,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .WithOne(login => login.User)
             .HasForeignKey(login => login.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(user => user.Notifications)
+            .WithOne(notification => notification.User)
+            .HasForeignKey(notification => notification.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

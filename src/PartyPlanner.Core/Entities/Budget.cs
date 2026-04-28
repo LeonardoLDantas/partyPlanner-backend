@@ -18,6 +18,11 @@ public sealed class Budget
     public decimal Spent { get; private set; }
     public List<BudgetItem> Items { get; private set; }
 
+    public void UpdateEstimated(decimal estimated)
+    {
+        Estimated = estimated;
+    }
+
     public void AddItem(BudgetItem item)
     {
         Items.Insert(0, item);

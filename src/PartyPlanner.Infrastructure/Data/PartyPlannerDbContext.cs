@@ -9,6 +9,7 @@ public sealed class PartyPlannerDbContext(DbContextOptions<PartyPlannerDbContext
     public DbSet<Party> Parties => Set<Party>();
     public DbSet<PartyTask> Tasks => Set<PartyTask>();
     public DbSet<Guest> Guests => Set<Guest>();
+    public DbSet<AppNotification> AppNotifications => Set<AppNotification>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserExternalLogin> UserExternalLogins => Set<UserExternalLogin>();
 
@@ -17,6 +18,7 @@ public sealed class PartyPlannerDbContext(DbContextOptions<PartyPlannerDbContext
         modelBuilder.ApplyConfiguration(new PartyConfiguration());
         modelBuilder.ApplyConfiguration(new PartyTaskConfiguration());
         modelBuilder.ApplyConfiguration(new GuestConfiguration());
+        modelBuilder.ApplyConfiguration(new AppNotificationConfiguration());
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new UserExternalLoginConfiguration());
     }

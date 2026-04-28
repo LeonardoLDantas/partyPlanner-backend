@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PartyPlanner.Core.Entities;
+using PartyPlanner.Core.Enums;
 using PartyPlanner.Infrastructure.Security;
 
 namespace PartyPlanner.Infrastructure.Data;
@@ -38,9 +39,11 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             Guid.Parse("11111111-1111-1111-1111-111111111111"),
             demoUser.Id,
             "Aniversario da Sofia",
-            "Aniversario",
-            "12 de abril de 2026",
+            PartyCategory.Aniversario,
+            "2026-04-12",
+            "19:00",
             "Espaco Jardim Azul",
+            60,
             new Budget(
                 8500,
                 4250,
@@ -65,6 +68,8 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             Guid.Parse("21111111-1111-1111-1111-111111111111"),
             "Fechar buffet infantil",
             "Luiza",
+            "2026-03-28",
+            "Concluida",
             true
         ));
 
@@ -72,6 +77,8 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             Guid.Parse("21111111-1111-1111-1111-111111111112"),
             "Confirmar decoracao tema sereia",
             "Marina",
+            "2026-04-05",
+            "Pendente",
             false
         ));
 

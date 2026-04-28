@@ -25,6 +25,7 @@ public sealed class User
     public bool IsEmailConfirmed { get; private set; }
     public DateTime CreatedAtUtc { get; private set; } = DateTime.UtcNow;
     public List<UserExternalLogin> ExternalLogins { get; private set; } = [];
+    public List<AppNotification> Notifications { get; private set; } = [];
     public List<Party> Parties { get; private set; } = [];
 
     public void ConfirmEmail()
