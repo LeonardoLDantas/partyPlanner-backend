@@ -27,9 +27,24 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
             .FirstOrDefaultAsync(party => party.Id == id, cancellationToken);
     }
 
+    public async Task<Party?> GetByInvitationTokenAsync(string invitationToken, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Parties
+            .Include(party => party.Tasks)
+            .Include(party => party.Guests)
+            .Include(party => party.Budget.Items)
+            .FirstOrDefaultAsync(party => party.Guests.Any(guest => guest.InvitationToken == invitationToken), cancellationToken);
+    }
+
     public async Task AddAsync(Party party, CancellationToken cancellationToken = default)
     {
         await dbContext.Parties.AddAsync(party, cancellationToken);
+    }
+
+    public async Task AddGuestAsync(Guid partyId, Guest guest, CancellationToken cancellationToken = default)
+    {
+        await dbContext.Guests.AddAsync(guest, cancellationToken);
+        dbContext.Entry(guest).Property<Guid?>("PartyId").CurrentValue = partyId;
     }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -43,6 +43,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             "2026-04-12",
             "19:00",
             "Espaco Jardim Azul",
+            "/illustrations/birthday-hero.svg",
             60,
             new Budget(
                 8500,
@@ -86,14 +87,20 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             Guid.Parse("31111111-1111-1111-1111-111111111111"),
             "Ana e familia",
             "Familia",
-            "Confirmado"
+            "Confirmado",
+            "demo-ana-familia",
+            "ana@example.com",
+            "5511999999999"
         ));
 
         party.AddGuest(new Guest(
             Guid.Parse("31111111-1111-1111-1111-111111111112"),
             "Escola Arco-Iris",
             "Amigos da escola",
-            "Pendente"
+            "Pendente",
+            "demo-escola-arco-iris",
+            string.Empty,
+            string.Empty
         ));
 
         await dbContext.Parties.AddAsync(party, cancellationToken);

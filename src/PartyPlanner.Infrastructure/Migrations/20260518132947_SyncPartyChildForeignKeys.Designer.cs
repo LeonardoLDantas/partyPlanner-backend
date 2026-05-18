@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PartyPlanner.Infrastructure.Data;
@@ -11,9 +12,11 @@ using PartyPlanner.Infrastructure.Data;
 namespace PartyPlanner.Infrastructure.Migrations
 {
     [DbContext(typeof(PartyPlannerDbContext))]
-    partial class PartyPlannerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260518132947_SyncPartyChildForeignKeys")]
+    partial class SyncPartyChildForeignKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,21 +73,6 @@ namespace PartyPlanner.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("character varying(160)");
-
-                    b.Property<string>("InvitationToken")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -101,9 +89,6 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PartyId");
-
-                    b.HasIndex("InvitationToken")
-                        .IsUnique();
 
                     b.ToTable("Guests", (string)null);
                 });

@@ -13,4 +13,6 @@ public interface IPartyService
     Task<PartyResponse?> ToggleTaskAsync(Guid ownerUserId, Guid partyId, Guid taskId, CancellationToken cancellationToken = default);
     Task<PartyResponse?> AddGuestAsync(Guid ownerUserId, Guid partyId, CreateGuestRequest request, CancellationToken cancellationToken = default);
     Task<PartyResponse?> AddBudgetItemAsync(Guid ownerUserId, Guid partyId, CreateBudgetItemRequest request, CancellationToken cancellationToken = default);
+    Task<InvitationResponse?> GetInvitationAsync(string token, CancellationToken cancellationToken = default);
+    Task<InvitationResponse?> RespondInvitationAsync(string token, RespondInvitationRequest request, CancellationToken cancellationToken = default);
 }

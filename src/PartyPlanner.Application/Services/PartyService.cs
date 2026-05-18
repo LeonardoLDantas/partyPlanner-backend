@@ -35,6 +35,7 @@ public sealed class PartyService(
             string.IsNullOrWhiteSpace(request.Date) ? "Data a definir" : request.Date.Trim(),
             string.IsNullOrWhiteSpace(request.Time) ? "19:00" : request.Time.Trim(),
             string.IsNullOrWhiteSpace(request.Location) ? "Local a definir" : request.Location.Trim(),
+            string.IsNullOrWhiteSpace(request.CoverImageUrl) ? string.Empty : request.CoverImageUrl.Trim(),
             Math.Max(request.ExpectedGuests ?? 0, 0),
             new Budget(request.EstimatedBudget, 0, [])
         );
@@ -65,6 +66,7 @@ public sealed class PartyService(
             string.IsNullOrWhiteSpace(request.Date) ? "Data a definir" : request.Date.Trim(),
             string.IsNullOrWhiteSpace(request.Time) ? "19:00" : request.Time.Trim(),
             string.IsNullOrWhiteSpace(request.Location) ? "Local a definir" : request.Location.Trim(),
+            string.IsNullOrWhiteSpace(request.CoverImageUrl) ? party.CoverImageUrl : request.CoverImageUrl.Trim(),
             Math.Max(request.ExpectedGuests ?? party.ExpectedGuests, 0),
             request.EstimatedBudget);
 
@@ -141,13 +143,17 @@ public sealed class PartyService(
 
         party.EnsureEditableOn(GetCurrentBusinessDate());
 
-        party.AddGuest(new Guest(
+        var guest = new Guest(
             Guid.NewGuid(),
             request.Name.Trim(),
             string.IsNullOrWhiteSpace(request.Group) ? "Geral" : request.Group.Trim(),
-            string.IsNullOrWhiteSpace(request.Status) ? "Pendente" : request.Status.Trim()
-        ));
+            "Pendente",
+            CreateInvitationToken(),
+            string.IsNullOrWhiteSpace(request.Email) ? string.Empty : request.Email.Trim(),
+            string.IsNullOrWhiteSpace(request.PhoneNumber) ? string.Empty : request.PhoneNumber.Trim()
+        );
 
+        await partyRepository.AddGuestAsync(party.Id, guest, cancellationToken);
         await partyRepository.SaveChangesAsync(cancellationToken);
         await notificationService.CreateAsync(
             ownerUserId,
@@ -155,7 +161,38 @@ public sealed class PartyService(
             $"\"{request.Name.Trim()}\" foi adicionado a lista de convidados.",
             "guest",
             cancellationToken);
-        return party.ToResponse();
+
+        var updatedParty = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        return (updatedParty ?? party).ToResponse();
+    }
+
+    public async Task<InvitationResponse?> GetInvitationAsync(string token, CancellationToken cancellationToken = default)
+    {
+        var party = await partyRepository.GetByInvitationTokenAsync(token, cancellationToken);
+        var guest = party?.Guests.FirstOrDefault(currentGuest => currentGuest.InvitationToken == token);
+        return party is null || guest is null ? null : ToInvitationResponse(party, guest);
+    }
+
+    public async Task<InvitationResponse?> RespondInvitationAsync(string token, RespondInvitationRequest request, CancellationToken cancellationToken = default)
+    {
+        var party = await partyRepository.GetByInvitationTokenAsync(token, cancellationToken);
+        var guest = party?.Guests.FirstOrDefault(currentGuest => currentGuest.InvitationToken == token);
+        if (party is null || guest is null)
+        {
+            return null;
+        }
+
+        var status = NormalizeInvitationStatus(request.Status);
+        guest.UpdateStatus(status);
+        await partyRepository.SaveChangesAsync(cancellationToken);
+        await notificationService.CreateAsync(
+            party.OwnerUserId,
+            "Resposta de convite",
+            $"\"{guest.Name}\" marcou presenca como {status} em \"{party.Name}\".",
+            "guest",
+            cancellationToken);
+
+        return ToInvitationResponse(party, guest);
     }
 
     public async Task<PartyResponse?> AddBudgetItemAsync(Guid ownerUserId, Guid partyId, CreateBudgetItemRequest request, CancellationToken cancellationToken = default)
@@ -203,5 +240,28 @@ public sealed class PartyService(
         }
 
         return DateOnly.FromDateTime(DateTime.UtcNow);
+    }
+
+    private static string CreateInvitationToken()
+    {
+        return Convert.ToHexString(Guid.NewGuid().ToByteArray()).ToLowerInvariant();
+    }
+
+    private static string NormalizeInvitationStatus(string status)
+    {
+        return status.Trim().Equals("Recusou", StringComparison.OrdinalIgnoreCase) ? "Recusou" : "Confirmado";
+    }
+
+    private static InvitationResponse ToInvitationResponse(Party party, Guest guest)
+    {
+        return new InvitationResponse(
+            guest.InvitationToken,
+            guest.Name,
+            guest.Status,
+            party.Name,
+            party.Date,
+            party.Time,
+            party.Location,
+            party.CoverImageUrl);
     }
 }

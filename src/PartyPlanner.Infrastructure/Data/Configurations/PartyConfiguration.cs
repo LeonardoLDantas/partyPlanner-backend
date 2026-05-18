@@ -17,6 +17,7 @@ public sealed class PartyConfiguration : IEntityTypeConfiguration<Party>
         builder.Property(party => party.Date).HasMaxLength(80).IsRequired();
         builder.Property(party => party.Time).HasMaxLength(20).IsRequired();
         builder.Property(party => party.Location).HasMaxLength(150).IsRequired();
+        builder.Property(party => party.CoverImageUrl).HasColumnType("text").IsRequired();
         builder.Property(party => party.ExpectedGuests).IsRequired();
 
         builder.HasMany(party => party.Tasks)

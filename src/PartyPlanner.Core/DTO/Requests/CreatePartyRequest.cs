@@ -8,6 +8,7 @@ public sealed record CreatePartyRequest(
     string? Date,
     string? Time,
     string? Location,
+    string? CoverImageUrl,
     int? ExpectedGuests,
-    decimal EstimatedBudget
+    decimal? EstimatedBudget
 );

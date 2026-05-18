@@ -12,6 +12,7 @@ public sealed class Party
         Date = string.Empty;
         Time = string.Empty;
         Location = string.Empty;
+        CoverImageUrl = string.Empty;
         Budget = null!;
     }
 
@@ -23,6 +24,7 @@ public sealed class Party
         string date,
         string time,
         string location,
+        string coverImageUrl,
         int expectedGuests,
         Budget budget)
     {
@@ -33,6 +35,7 @@ public sealed class Party
         Date = date;
         Time = time;
         Location = location;
+        CoverImageUrl = coverImageUrl;
         ExpectedGuests = expectedGuests;
         Budget = budget;
     }
@@ -44,6 +47,7 @@ public sealed class Party
     public string Date { get; private set; }
     public string Time { get; private set; }
     public string Location { get; private set; }
+    public string CoverImageUrl { get; private set; }
     public int ExpectedGuests { get; private set; }
     public List<PartyTask> Tasks { get; private set; } = [];
     public List<Guest> Guests { get; private set; } = [];
@@ -83,14 +87,16 @@ public sealed class Party
         string date,
         string time,
         string location,
+        string coverImageUrl,
         int expectedGuests,
-        decimal estimatedBudget)
+        decimal? estimatedBudget)
     {
         Name = name;
         Category = category;
         Date = date;
         Time = time;
         Location = location;
+        CoverImageUrl = coverImageUrl;
         ExpectedGuests = expectedGuests;
         Budget.UpdateEstimated(estimatedBudget);
     }
