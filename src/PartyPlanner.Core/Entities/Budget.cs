@@ -7,18 +7,18 @@ public sealed class Budget
         Items = [];
     }
 
-    public Budget(decimal estimated, decimal spent, IReadOnlyCollection<BudgetItem> items)
+    public Budget(decimal? estimated, decimal spent, IReadOnlyCollection<BudgetItem> items)
     {
         Estimated = estimated;
         Spent = spent;
         Items = items.ToList();
     }
 
-    public decimal Estimated { get; private set; }
+    public decimal? Estimated { get; private set; }
     public decimal Spent { get; private set; }
     public List<BudgetItem> Items { get; private set; }
 
-    public void UpdateEstimated(decimal estimated)
+    public void UpdateEstimated(decimal? estimated)
     {
         Estimated = estimated;
     }

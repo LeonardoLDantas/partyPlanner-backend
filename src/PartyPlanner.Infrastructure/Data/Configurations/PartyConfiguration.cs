@@ -17,7 +17,9 @@ public sealed class PartyConfiguration : IEntityTypeConfiguration<Party>
         builder.Property(party => party.Date).HasMaxLength(80).IsRequired();
         builder.Property(party => party.Time).HasMaxLength(20).IsRequired();
         builder.Property(party => party.Location).HasMaxLength(150).IsRequired();
+        builder.Property(party => party.CoverImageUrl).HasColumnType("text").IsRequired();
         builder.Property(party => party.ExpectedGuests).IsRequired();
+        builder.Property(party => party.IsFinalized).IsRequired();
 
         builder.HasMany(party => party.Tasks)
             .WithOne()
@@ -45,7 +47,7 @@ public sealed class PartyConfiguration : IEntityTypeConfiguration<Party>
                 item.WithOwner().HasForeignKey("PartyId");
                 item.HasKey(current => current.Id);
                 item.Property(current => current.Label).HasMaxLength(150).IsRequired();
-                item.Property(current => current.Category).HasMaxLength(80).IsRequired();
+                item.Property(current => current.Category).HasConversion<string>().HasMaxLength(80).IsRequired();
                 item.Property(current => current.Amount).HasColumnType("decimal(18,2)");
             });
         });

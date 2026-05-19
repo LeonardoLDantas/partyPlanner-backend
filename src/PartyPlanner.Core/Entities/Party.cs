@@ -12,6 +12,7 @@ public sealed class Party
         Date = string.Empty;
         Time = string.Empty;
         Location = string.Empty;
+        CoverImageUrl = string.Empty;
         Budget = null!;
     }
 
@@ -23,8 +24,10 @@ public sealed class Party
         string date,
         string time,
         string location,
+        string coverImageUrl,
         int expectedGuests,
-        Budget budget)
+        Budget budget,
+        bool isFinalized = false)
     {
         Id = id;
         OwnerUserId = ownerUserId;
@@ -33,8 +36,10 @@ public sealed class Party
         Date = date;
         Time = time;
         Location = location;
+        CoverImageUrl = coverImageUrl;
         ExpectedGuests = expectedGuests;
         Budget = budget;
+        IsFinalized = isFinalized;
     }
 
     public Guid Id { get; private set; }
@@ -44,7 +49,9 @@ public sealed class Party
     public string Date { get; private set; }
     public string Time { get; private set; }
     public string Location { get; private set; }
+    public string CoverImageUrl { get; private set; }
     public int ExpectedGuests { get; private set; }
+    public bool IsFinalized { get; private set; }
     public List<PartyTask> Tasks { get; private set; } = [];
     public List<Guest> Guests { get; private set; } = [];
     public Budget Budget { get; private set; }
@@ -72,6 +79,30 @@ public sealed class Party
         return true;
     }
 
+    public bool UpdateTaskStatus(Guid taskId, string status)
+    {
+        var task = Tasks.FirstOrDefault(currentTask => currentTask.Id == taskId);
+        if (task is null)
+        {
+            return false;
+        }
+
+        task.UpdateStatus(status);
+        return true;
+    }
+
+    public bool UpdateTask(Guid taskId, string title, string assignee, string description, string status)
+    {
+        var task = Tasks.FirstOrDefault(currentTask => currentTask.Id == taskId);
+        if (task is null)
+        {
+            return false;
+        }
+
+        task.UpdateDetails(title, assignee, description, status);
+        return true;
+    }
+
     public void AddBudgetItem(BudgetItem item)
     {
         Budget.AddItem(item);
@@ -83,16 +114,20 @@ public sealed class Party
         string date,
         string time,
         string location,
+        string coverImageUrl,
         int expectedGuests,
-        decimal estimatedBudget)
+        decimal? estimatedBudget,
+        bool isFinalized)
     {
         Name = name;
         Category = category;
         Date = date;
         Time = time;
         Location = location;
+        CoverImageUrl = coverImageUrl;
         ExpectedGuests = expectedGuests;
         Budget.UpdateEstimated(estimatedBudget);
+        IsFinalized = isFinalized;
     }
 
     public bool CanBeEditedOn(DateOnly referenceDate)

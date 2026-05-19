@@ -5,6 +5,7 @@ public sealed record PartyTaskResponse(
     string Title,
     string Assignee,
     string DueDate,
+    string Description,
     string Status,
     bool Done
 );

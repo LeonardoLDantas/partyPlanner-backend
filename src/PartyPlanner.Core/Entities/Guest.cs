@@ -6,16 +6,27 @@ public sealed class Guest
     {
     }
 
-    public Guest(Guid id, string name, string group, string status)
+    public Guest(Guid id, string name, string group, string status, string invitationToken, string email, string phoneNumber)
     {
         Id = id;
         Name = name;
         Group = group;
         Status = status;
+        InvitationToken = invitationToken;
+        Email = email;
+        PhoneNumber = phoneNumber;
     }
 
     public Guid Id { get; private set; }
     public string Name { get; private set; } = string.Empty;
     public string Group { get; private set; } = string.Empty;
     public string Status { get; private set; } = string.Empty;
+    public string InvitationToken { get; private set; } = string.Empty;
+    public string Email { get; private set; } = string.Empty;
+    public string PhoneNumber { get; private set; } = string.Empty;
+
+    public void UpdateStatus(string status)
+    {
+        Status = status;
+    }
 }

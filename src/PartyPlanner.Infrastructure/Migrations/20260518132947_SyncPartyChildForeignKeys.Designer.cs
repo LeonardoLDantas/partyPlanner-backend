@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PartyPlanner.Infrastructure.Data;
@@ -11,9 +12,11 @@ using PartyPlanner.Infrastructure.Data;
 namespace PartyPlanner.Infrastructure.Migrations
 {
     [DbContext(typeof(PartyPlannerDbContext))]
-    partial class PartyPlannerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260518132947_SyncPartyChildForeignKeys")]
+    partial class SyncPartyChildForeignKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,20 +68,10 @@ namespace PartyPlanner.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("character varying(160)");
-
                     b.Property<string>("Group")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<string>("InvitationToken")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -88,20 +81,12 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.Property<Guid?>("PartyId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("InvitationToken")
-                        .IsUnique();
 
                     b.HasIndex("PartyId");
 
@@ -128,9 +113,6 @@ namespace PartyPlanner.Infrastructure.Migrations
 
                     b.Property<int>("ExpectedGuests")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("IsFinalized")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("Location")
                         .IsRequired()
@@ -167,11 +149,6 @@ namespace PartyPlanner.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("Done")
                         .HasColumnType("boolean");
