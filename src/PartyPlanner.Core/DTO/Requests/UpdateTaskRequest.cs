@@ -1,9 +1,8 @@
 namespace PartyPlanner.Core.DTO.Requests;
 
-public sealed record CreateTaskRequest(
-    string Title,
+public sealed record UpdateTaskRequest(
+    string? Title,
     string? Assignee,
-    string? DueDate,
     string? Description,
     string? Status
 );

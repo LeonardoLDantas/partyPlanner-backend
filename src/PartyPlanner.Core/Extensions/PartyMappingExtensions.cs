@@ -19,9 +19,10 @@ public static class PartyMappingExtensions
             party.Location,
             party.CoverImageUrl,
             party.ExpectedGuests,
+            party.IsFinalized,
             party.CanBeEditedOn(GetCurrentBusinessDate()),
             party.Tasks
-                .Select(task => new PartyTaskResponse(task.Id, task.Title, task.Assignee, task.DueDate, task.Status, task.Done))
+                .Select(task => new PartyTaskResponse(task.Id, task.Title, task.Assignee, task.DueDate, task.Description, task.Status, task.Done))
                 .ToArray(),
             party.Guests
                 .Select(guest => new GuestResponse(guest.Id, guest.Name, guest.Group, guest.Status, guest.InvitationToken, guest.Email, guest.PhoneNumber))

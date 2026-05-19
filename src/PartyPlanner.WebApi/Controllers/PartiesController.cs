@@ -101,6 +101,21 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
         }
     }
 
+    [HttpPatch("{partyId:guid}/tasks/{taskId:guid}")]
+    public async Task<IActionResult> UpdateTaskStatus(Guid partyId, Guid taskId, [FromBody] UpdateTaskRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var party = await partyService.UpdateTaskStatusAsync(GetUserId(), partyId, taskId, request, cancellationToken);
+            return party is null ? NotFound() : Ok(party);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ModelState.AddModelError(nameof(partyId), exception.Message);
+            return ValidationProblem(ModelState);
+        }
+    }
+
     [HttpPost("{partyId:guid}/guests")]
     public async Task<IActionResult> AddGuest(Guid partyId, [FromBody] CreateGuestRequest request, CancellationToken cancellationToken)
     {
@@ -134,6 +149,42 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
         try
         {
             var party = await partyService.AddBudgetItemAsync(GetUserId(), partyId, request, cancellationToken);
+            return party is null ? NotFound() : Ok(party);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ModelState.AddModelError(nameof(partyId), exception.Message);
+            return ValidationProblem(ModelState);
+        }
+    }
+
+    [HttpPut("{partyId:guid}/budget-items/{budgetItemId:guid}")]
+    public async Task<IActionResult> UpdateBudgetItem(Guid partyId, Guid budgetItemId, [FromBody] CreateBudgetItemRequest request, CancellationToken cancellationToken)
+    {
+        if (request.Amount <= 0)
+        {
+            ModelState.AddModelError(nameof(request.Amount), "Positive amount is required.");
+            return ValidationProblem(ModelState);
+        }
+
+        try
+        {
+            var party = await partyService.UpdateBudgetItemAsync(GetUserId(), partyId, budgetItemId, request, cancellationToken);
+            return party is null ? NotFound() : Ok(party);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ModelState.AddModelError(nameof(partyId), exception.Message);
+            return ValidationProblem(ModelState);
+        }
+    }
+
+    [HttpDelete("{partyId:guid}/budget-items/{budgetItemId:guid}")]
+    public async Task<IActionResult> DeleteBudgetItem(Guid partyId, Guid budgetItemId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var party = await partyService.DeleteBudgetItemAsync(GetUserId(), partyId, budgetItemId, cancellationToken);
             return party is null ? NotFound() : Ok(party);
         }
         catch (InvalidOperationException exception)

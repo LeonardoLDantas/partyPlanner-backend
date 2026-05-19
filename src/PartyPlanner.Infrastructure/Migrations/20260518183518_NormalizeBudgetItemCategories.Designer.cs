@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PartyPlanner.Infrastructure.Data;
@@ -11,9 +12,11 @@ using PartyPlanner.Infrastructure.Data;
 namespace PartyPlanner.Infrastructure.Migrations
 {
     [DbContext(typeof(PartyPlannerDbContext))]
-    partial class PartyPlannerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260518183518_NormalizeBudgetItemCategories")]
+    partial class NormalizeBudgetItemCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,11 +170,6 @@ namespace PartyPlanner.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("Done")
                         .HasColumnType("boolean");

@@ -12,6 +12,7 @@ public sealed record PartyResponse(
     string Location,
     string CoverImageUrl,
     int ExpectedGuests,
+    bool IsFinalized,
     bool CanEdit,
     IReadOnlyCollection<PartyTaskResponse> Tasks,
     IReadOnlyCollection<GuestResponse> Guests,

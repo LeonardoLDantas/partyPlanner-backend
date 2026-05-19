@@ -37,7 +37,8 @@ public sealed class PartyService(
             string.IsNullOrWhiteSpace(request.Location) ? "Local a definir" : request.Location.Trim(),
             string.IsNullOrWhiteSpace(request.CoverImageUrl) ? string.Empty : request.CoverImageUrl.Trim(),
             Math.Max(request.ExpectedGuests ?? 0, 0),
-            new Budget(request.EstimatedBudget, 0, [])
+            new Budget(request.EstimatedBudget, 0, []),
+            request.IsFinalized ?? false
         );
 
         await partyRepository.AddAsync(party, cancellationToken);
@@ -68,7 +69,8 @@ public sealed class PartyService(
             string.IsNullOrWhiteSpace(request.Location) ? "Local a definir" : request.Location.Trim(),
             string.IsNullOrWhiteSpace(request.CoverImageUrl) ? party.CoverImageUrl : request.CoverImageUrl.Trim(),
             Math.Max(request.ExpectedGuests ?? party.ExpectedGuests, 0),
-            request.EstimatedBudget);
+            request.EstimatedBudget,
+            request.IsFinalized ?? party.IsFinalized);
 
         await partyRepository.SaveChangesAsync(cancellationToken);
         await notificationService.CreateAsync(
@@ -90,15 +92,16 @@ public sealed class PartyService(
 
         party.EnsureEditableOn(GetCurrentBusinessDate());
 
-        party.AddTask(new PartyTask(
+        var task = new PartyTask(
             Guid.NewGuid(),
             request.Title.Trim(),
-            string.IsNullOrWhiteSpace(request.Assignee) ? "Sem responsavel" : request.Assignee.Trim(),
+            string.IsNullOrWhiteSpace(request.Assignee) ? "Sem responsável" : request.Assignee.Trim(),
             string.IsNullOrWhiteSpace(request.DueDate) ? party.Date : request.DueDate.Trim(),
-            string.IsNullOrWhiteSpace(request.Status) ? "Pendente" : request.Status.Trim(),
-            false
-        ));
+            string.IsNullOrWhiteSpace(request.Description) ? string.Empty : request.Description.Trim(),
+            NormalizeTaskStatus(request.Status),
+            false);
 
+        await partyRepository.AddTaskAsync(party.Id, task, cancellationToken);
         await partyRepository.SaveChangesAsync(cancellationToken);
         await notificationService.CreateAsync(
             ownerUserId,
@@ -106,7 +109,9 @@ public sealed class PartyService(
             $"A tarefa \"{request.Title.Trim()}\" foi adicionada em \"{party.Name}\".",
             "task",
             cancellationToken);
-        return party.ToResponse();
+
+        var updatedParty = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        return (updatedParty ?? party).ToResponse();
     }
 
     public async Task<PartyResponse?> ToggleTaskAsync(Guid ownerUserId, Guid partyId, Guid taskId, CancellationToken cancellationToken = default)
@@ -128,6 +133,40 @@ public sealed class PartyService(
             ownerUserId,
             "Tarefa atualizada",
             "O status de uma tarefa foi atualizado.",
+            "task",
+            cancellationToken);
+        return party.ToResponse();
+    }
+
+    public async Task<PartyResponse?> UpdateTaskStatusAsync(Guid ownerUserId, Guid partyId, Guid taskId, UpdateTaskRequest request, CancellationToken cancellationToken = default)
+    {
+        var party = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        if (party is null)
+        {
+            return null;
+        }
+
+        party.EnsureEditableOn(GetCurrentBusinessDate());
+        var currentTask = party.Tasks.FirstOrDefault(task => task.Id == taskId);
+        if (currentTask is null)
+        {
+            return null;
+        }
+
+        var status = NormalizeTaskStatus(request.Status ?? currentTask.Status);
+        var title = string.IsNullOrWhiteSpace(request.Title) ? currentTask.Title : request.Title.Trim();
+        var assignee = string.IsNullOrWhiteSpace(request.Assignee) ? currentTask.Assignee : request.Assignee.Trim();
+        var description = request.Description is null ? currentTask.Description : request.Description.Trim();
+        if (!party.UpdateTask(taskId, title, assignee, description, status))
+        {
+            return null;
+        }
+
+        await partyRepository.SaveChangesAsync(cancellationToken);
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Tarefa movida",
+            $"Uma tarefa foi movida para \"{status}\" em \"{party.Name}\".",
             "task",
             cancellationToken);
         return party.ToResponse();
@@ -205,21 +244,67 @@ public sealed class PartyService(
 
         party.EnsureEditableOn(GetCurrentBusinessDate());
 
-        party.AddBudgetItem(new BudgetItem(
+        var budgetItem = new BudgetItem(
             Guid.NewGuid(),
             request.Label.Trim(),
-            string.IsNullOrWhiteSpace(request.Category) ? "Geral" : request.Category.Trim(),
-            request.Amount
-        ));
+            request.Category ?? ExpenseCategory.Outros,
+            request.Amount);
 
-        await partyRepository.SaveChangesAsync(cancellationToken);
+        await partyRepository.AddBudgetItemAsync(party.Id, budgetItem, cancellationToken);
         await notificationService.CreateAsync(
             ownerUserId,
             "Despesa adicionada",
             $"A despesa \"{request.Label.Trim()}\" foi registrada no evento \"{party.Name}\".",
             "budget",
             cancellationToken);
-        return party.ToResponse();
+        await partyRepository.SaveChangesAsync(cancellationToken);
+
+        var updatedParty = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        return (updatedParty ?? party).ToResponse();
+    }
+
+    public async Task<PartyResponse?> UpdateBudgetItemAsync(Guid ownerUserId, Guid partyId, Guid budgetItemId, CreateBudgetItemRequest request, CancellationToken cancellationToken = default)
+    {
+        var party = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        if (party is null)
+        {
+            return null;
+        }
+
+        party.EnsureEditableOn(GetCurrentBusinessDate());
+        await partyRepository.UpdateBudgetItemAsync(party.Id, budgetItemId, request.Amount, cancellationToken);
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Despesa atualizada",
+            $"Uma despesa do evento \"{party.Name}\" foi atualizada.",
+            "budget",
+            cancellationToken);
+        await partyRepository.SaveChangesAsync(cancellationToken);
+
+        var updatedParty = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        return (updatedParty ?? party).ToResponse();
+    }
+
+    public async Task<PartyResponse?> DeleteBudgetItemAsync(Guid ownerUserId, Guid partyId, Guid budgetItemId, CancellationToken cancellationToken = default)
+    {
+        var party = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        if (party is null)
+        {
+            return null;
+        }
+
+        party.EnsureEditableOn(GetCurrentBusinessDate());
+        await partyRepository.DeleteBudgetItemAsync(party.Id, budgetItemId, cancellationToken);
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Despesa removida",
+            $"Uma despesa do evento \"{party.Name}\" foi removida.",
+            "budget",
+            cancellationToken);
+        await partyRepository.SaveChangesAsync(cancellationToken);
+
+        var updatedParty = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        return (updatedParty ?? party).ToResponse();
     }
 
     private static DateOnly GetCurrentBusinessDate()
@@ -250,6 +335,18 @@ public sealed class PartyService(
     private static string NormalizeInvitationStatus(string status)
     {
         return status.Trim().Equals("Recusou", StringComparison.OrdinalIgnoreCase) ? "Recusou" : "Confirmado";
+    }
+
+    private static string NormalizeTaskStatus(string? status)
+    {
+        var normalized = string.IsNullOrWhiteSpace(status) ? "Pendente" : status.Trim();
+
+        return normalized.ToLowerInvariant() switch
+        {
+            "em andamento" => "Em andamento",
+            "concluida" or "concluída" or "feito" or "feita" => "Concluída",
+            _ => "Pendente"
+        };
     }
 
     private static InvitationResponse ToInvitationResponse(Party party, Guest guest)

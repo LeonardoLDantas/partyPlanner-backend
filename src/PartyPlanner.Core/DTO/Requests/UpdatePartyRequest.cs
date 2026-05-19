@@ -10,5 +10,6 @@ public sealed record UpdatePartyRequest(
     string? Location,
     string? CoverImageUrl,
     int? ExpectedGuests,
-    decimal? EstimatedBudget
+    decimal? EstimatedBudget,
+    bool? IsFinalized
 );

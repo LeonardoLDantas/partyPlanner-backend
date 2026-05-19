@@ -52,13 +52,13 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
                     new BudgetItem(
                         Guid.Parse("41111111-1111-1111-1111-111111111111"),
                         "Buffet",
-                        "Alimentacao",
+                        ExpenseCategory.Alimentacao,
                         2800
                     ),
                     new BudgetItem(
                         Guid.Parse("41111111-1111-1111-1111-111111111112"),
                         "Decoracao",
-                        "Ambiente",
+                        ExpenseCategory.Decoracao,
                         1450
                     )
                 ]
@@ -70,6 +70,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             "Fechar buffet infantil",
             "Luiza",
             "2026-03-28",
+            "Confirmar cardápio, quantidade de mesas e horário de montagem.",
             "Concluida",
             true
         ));
@@ -79,6 +80,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             "Confirmar decoracao tema sereia",
             "Marina",
             "2026-04-05",
+            "Revisar cores, painel principal e lembrancinhas.",
             "Pendente",
             false
         ));
