@@ -47,10 +47,34 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
         dbContext.Entry(task).Property<Guid?>("PartyId").CurrentValue = partyId;
     }
 
+    public async Task DeleteTaskAsync(Guid partyId, Guid taskId, CancellationToken cancellationToken = default)
+    {
+        await dbContext.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             DELETE FROM "Tasks"
+             WHERE "Id" = {taskId} AND "PartyId" = {partyId}
+             """,
+            cancellationToken);
+
+        dbContext.ChangeTracker.Clear();
+    }
+
     public async Task AddGuestAsync(Guid partyId, Guest guest, CancellationToken cancellationToken = default)
     {
         await dbContext.Guests.AddAsync(guest, cancellationToken);
         dbContext.Entry(guest).Property<Guid?>("PartyId").CurrentValue = partyId;
+    }
+
+    public async Task DeleteGuestAsync(Guid partyId, Guid guestId, CancellationToken cancellationToken = default)
+    {
+        await dbContext.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             DELETE FROM "Guests"
+             WHERE "Id" = {guestId} AND "PartyId" = {partyId}
+             """,
+            cancellationToken);
+
+        dbContext.ChangeTracker.Clear();
     }
 
     public async Task AddBudgetItemAsync(Guid partyId, BudgetItem item, CancellationToken cancellationToken = default)
