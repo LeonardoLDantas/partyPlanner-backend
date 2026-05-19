@@ -140,12 +140,50 @@ public sealed class Party
         return referenceDate <= eventDate;
     }
 
+    public bool IsFinalizedOn(DateOnly referenceDate)
+    {
+        return IsFinalized || IsPastOn(referenceDate);
+    }
+
+    public bool FinalizeIfPast(DateOnly referenceDate)
+    {
+        if (IsFinalized || !IsPastOn(referenceDate))
+        {
+            return false;
+        }
+
+        IsFinalized = true;
+        return true;
+    }
+
     public void EnsureEditableOn(DateOnly referenceDate)
     {
+        FinalizeIfPast(referenceDate);
+
         if (!CanBeEditedOn(referenceDate))
         {
             throw new InvalidOperationException("A festa nao pode mais ser editada apos a data de realizacao.");
         }
+    }
+
+    public void EnsureAcceptingChangesOn(DateOnly referenceDate)
+    {
+        FinalizeIfPast(referenceDate);
+
+        if (IsFinalized)
+        {
+            throw new InvalidOperationException("A festa esta finalizada e nao aceita novas alteracoes.");
+        }
+
+        if (!CanBeEditedOn(referenceDate))
+        {
+            throw new InvalidOperationException("A festa nao pode mais ser editada apos a data de realizacao.");
+        }
+    }
+
+    private bool IsPastOn(DateOnly referenceDate)
+    {
+        return TryGetEventDate(out var eventDate) && eventDate < referenceDate;
     }
 
     private bool TryGetEventDate(out DateOnly eventDate)

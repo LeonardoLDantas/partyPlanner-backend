@@ -9,6 +9,8 @@ public static class PartyMappingExtensions
 
     public static PartyResponse ToResponse(this Party party)
     {
+        var currentDate = GetCurrentBusinessDate();
+
         return new PartyResponse(
             party.Id,
             party.OwnerUserId,
@@ -19,8 +21,8 @@ public static class PartyMappingExtensions
             party.Location,
             party.CoverImageUrl,
             party.ExpectedGuests,
-            party.IsFinalized,
-            party.CanBeEditedOn(GetCurrentBusinessDate()),
+            party.IsFinalizedOn(currentDate),
+            party.CanBeEditedOn(currentDate),
             party.Tasks
                 .Select(task => new PartyTaskResponse(task.Id, task.Title, task.Assignee, task.DueDate, task.Description, task.Status, task.Done))
                 .ToArray(),

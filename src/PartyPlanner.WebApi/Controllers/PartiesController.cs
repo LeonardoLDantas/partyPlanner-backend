@@ -116,6 +116,21 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
         }
     }
 
+    [HttpDelete("{partyId:guid}/tasks/{taskId:guid}")]
+    public async Task<IActionResult> DeleteTask(Guid partyId, Guid taskId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var party = await partyService.DeleteTaskAsync(GetUserId(), partyId, taskId, cancellationToken);
+            return party is null ? NotFound() : Ok(party);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ModelState.AddModelError(nameof(partyId), exception.Message);
+            return ValidationProblem(ModelState);
+        }
+    }
+
     [HttpPost("{partyId:guid}/guests")]
     public async Task<IActionResult> AddGuest(Guid partyId, [FromBody] CreateGuestRequest request, CancellationToken cancellationToken)
     {
@@ -128,6 +143,21 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
         try
         {
             var party = await partyService.AddGuestAsync(GetUserId(), partyId, request, cancellationToken);
+            return party is null ? NotFound() : Ok(party);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ModelState.AddModelError(nameof(partyId), exception.Message);
+            return ValidationProblem(ModelState);
+        }
+    }
+
+    [HttpDelete("{partyId:guid}/guests/{guestId:guid}")]
+    public async Task<IActionResult> DeleteGuest(Guid partyId, Guid guestId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var party = await partyService.DeleteGuestAsync(GetUserId(), partyId, guestId, cancellationToken);
             return party is null ? NotFound() : Ok(party);
         }
         catch (InvalidOperationException exception)

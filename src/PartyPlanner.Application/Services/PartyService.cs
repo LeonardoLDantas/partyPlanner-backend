@@ -16,12 +16,23 @@ public sealed class PartyService(
     public async Task<IReadOnlyCollection<PartyResponse>> GetAllAsync(Guid ownerUserId, CancellationToken cancellationToken = default)
     {
         var parties = await partyRepository.GetAllAsync(ownerUserId, cancellationToken);
+        var currentDate = GetCurrentBusinessDate();
+        if (parties.Any(party => party.FinalizeIfPast(currentDate)))
+        {
+            await partyRepository.SaveChangesAsync(cancellationToken);
+        }
+
         return parties.Select(party => party.ToResponse()).ToArray();
     }
 
     public async Task<PartyResponse?> GetByIdAsync(Guid id, Guid ownerUserId, CancellationToken cancellationToken = default)
     {
         var party = await partyRepository.GetByIdAsync(id, ownerUserId, cancellationToken);
+        if (party?.FinalizeIfPast(GetCurrentBusinessDate()) == true)
+        {
+            await partyRepository.SaveChangesAsync(cancellationToken);
+        }
+
         return party?.ToResponse();
     }
 
@@ -90,7 +101,7 @@ public sealed class PartyService(
             return null;
         }
 
-        party.EnsureEditableOn(GetCurrentBusinessDate());
+        party.EnsureAcceptingChangesOn(GetCurrentBusinessDate());
 
         var task = new PartyTask(
             Guid.NewGuid(),
@@ -122,7 +133,7 @@ public sealed class PartyService(
             return null;
         }
 
-        party.EnsureEditableOn(GetCurrentBusinessDate());
+        party.EnsureAcceptingChangesOn(GetCurrentBusinessDate());
         if (!party.ToggleTask(taskId))
         {
             return null;
@@ -146,7 +157,7 @@ public sealed class PartyService(
             return null;
         }
 
-        party.EnsureEditableOn(GetCurrentBusinessDate());
+        party.EnsureAcceptingChangesOn(GetCurrentBusinessDate());
         var currentTask = party.Tasks.FirstOrDefault(task => task.Id == taskId);
         if (currentTask is null)
         {
@@ -172,6 +183,33 @@ public sealed class PartyService(
         return party.ToResponse();
     }
 
+    public async Task<PartyResponse?> DeleteTaskAsync(Guid ownerUserId, Guid partyId, Guid taskId, CancellationToken cancellationToken = default)
+    {
+        var party = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        if (party is null)
+        {
+            return null;
+        }
+
+        party.EnsureAcceptingChangesOn(GetCurrentBusinessDate());
+        if (party.Tasks.All(task => task.Id != taskId))
+        {
+            return null;
+        }
+
+        await partyRepository.DeleteTaskAsync(party.Id, taskId, cancellationToken);
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Tarefa removida",
+            $"Uma tarefa foi removida de \"{party.Name}\".",
+            "task",
+            cancellationToken);
+        await partyRepository.SaveChangesAsync(cancellationToken);
+
+        var updatedParty = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        return (updatedParty ?? party).ToResponse();
+    }
+
     public async Task<PartyResponse?> AddGuestAsync(Guid ownerUserId, Guid partyId, CreateGuestRequest request, CancellationToken cancellationToken = default)
     {
         var party = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
@@ -180,7 +218,7 @@ public sealed class PartyService(
             return null;
         }
 
-        party.EnsureEditableOn(GetCurrentBusinessDate());
+        party.EnsureAcceptingChangesOn(GetCurrentBusinessDate());
 
         var guest = new Guest(
             Guid.NewGuid(),
@@ -200,6 +238,33 @@ public sealed class PartyService(
             $"\"{request.Name.Trim()}\" foi adicionado a lista de convidados.",
             "guest",
             cancellationToken);
+
+        var updatedParty = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        return (updatedParty ?? party).ToResponse();
+    }
+
+    public async Task<PartyResponse?> DeleteGuestAsync(Guid ownerUserId, Guid partyId, Guid guestId, CancellationToken cancellationToken = default)
+    {
+        var party = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        if (party is null)
+        {
+            return null;
+        }
+
+        party.EnsureAcceptingChangesOn(GetCurrentBusinessDate());
+        if (party.Guests.All(guest => guest.Id != guestId))
+        {
+            return null;
+        }
+
+        await partyRepository.DeleteGuestAsync(party.Id, guestId, cancellationToken);
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Convidado removido",
+            $"Um convidado foi removido de \"{party.Name}\".",
+            "guest",
+            cancellationToken);
+        await partyRepository.SaveChangesAsync(cancellationToken);
 
         var updatedParty = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
         return (updatedParty ?? party).ToResponse();
@@ -242,7 +307,7 @@ public sealed class PartyService(
             return null;
         }
 
-        party.EnsureEditableOn(GetCurrentBusinessDate());
+        party.EnsureAcceptingChangesOn(GetCurrentBusinessDate());
 
         var budgetItem = new BudgetItem(
             Guid.NewGuid(),
@@ -271,7 +336,7 @@ public sealed class PartyService(
             return null;
         }
 
-        party.EnsureEditableOn(GetCurrentBusinessDate());
+        party.EnsureAcceptingChangesOn(GetCurrentBusinessDate());
         await partyRepository.UpdateBudgetItemAsync(party.Id, budgetItemId, request.Amount, cancellationToken);
         await notificationService.CreateAsync(
             ownerUserId,
@@ -293,7 +358,7 @@ public sealed class PartyService(
             return null;
         }
 
-        party.EnsureEditableOn(GetCurrentBusinessDate());
+        party.EnsureAcceptingChangesOn(GetCurrentBusinessDate());
         await partyRepository.DeleteBudgetItemAsync(party.Id, budgetItemId, cancellationToken);
         await notificationService.CreateAsync(
             ownerUserId,
