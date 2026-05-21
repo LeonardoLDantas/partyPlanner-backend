@@ -5,5 +5,6 @@ namespace PartyPlanner.Core.DTO.Requests;
 public sealed record CreateBudgetItemRequest(
     string Label,
     ExpenseCategory? Category,
-    decimal Amount
+    decimal Amount,
+    bool IsPaid
 );

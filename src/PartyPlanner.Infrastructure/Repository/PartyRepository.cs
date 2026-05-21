@@ -81,8 +81,8 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
     {
         await dbContext.Database.ExecuteSqlInterpolatedAsync(
             $"""
-             INSERT INTO "BudgetItems" ("Id", "PartyId", "Label", "Category", "Amount")
-             VALUES ({item.Id}, {partyId}, {item.Label}, {item.Category.ToString()}, {item.Amount})
+             INSERT INTO "BudgetItems" ("Id", "PartyId", "Label", "Category", "Amount", "IsPaid")
+             VALUES ({item.Id}, {partyId}, {item.Label}, {item.Category.ToString()}, {item.Amount}, {item.IsPaid})
              """,
             cancellationToken);
 
@@ -97,7 +97,7 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
         dbContext.ChangeTracker.Clear();
     }
 
-    public async Task UpdateBudgetItemAsync(Guid partyId, Guid budgetItemId, decimal amount, CancellationToken cancellationToken = default)
+    public async Task UpdateBudgetItemAsync(Guid partyId, Guid budgetItemId, decimal amount, bool isPaid, CancellationToken cancellationToken = default)
     {
         await dbContext.Database.ExecuteSqlInterpolatedAsync(
             $"""
@@ -113,7 +113,7 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
         await dbContext.Database.ExecuteSqlInterpolatedAsync(
             $"""
              UPDATE "BudgetItems"
-             SET "Amount" = {amount}
+             SET "Amount" = {amount}, "IsPaid" = {isPaid}
              WHERE "Id" = {budgetItemId} AND "PartyId" = {partyId}
              """,
             cancellationToken);

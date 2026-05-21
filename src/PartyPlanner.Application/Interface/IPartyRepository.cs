@@ -13,7 +13,7 @@ public interface IPartyRepository
     Task AddGuestAsync(Guid partyId, Guest guest, CancellationToken cancellationToken = default);
     Task DeleteGuestAsync(Guid partyId, Guid guestId, CancellationToken cancellationToken = default);
     Task AddBudgetItemAsync(Guid partyId, BudgetItem item, CancellationToken cancellationToken = default);
-    Task UpdateBudgetItemAsync(Guid partyId, Guid budgetItemId, decimal amount, CancellationToken cancellationToken = default);
+    Task UpdateBudgetItemAsync(Guid partyId, Guid budgetItemId, decimal amount, bool isPaid, CancellationToken cancellationToken = default);
     Task DeleteBudgetItemAsync(Guid partyId, Guid budgetItemId, CancellationToken cancellationToken = default);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

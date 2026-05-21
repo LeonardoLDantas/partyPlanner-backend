@@ -6,5 +6,6 @@ public sealed record BudgetItemResponse(
     Guid Id,
     string Label,
     ExpenseCategory Category,
-    decimal Amount
+    decimal Amount,
+    bool IsPaid
 );
