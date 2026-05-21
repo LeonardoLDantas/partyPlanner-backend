@@ -53,13 +53,15 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
                         Guid.Parse("41111111-1111-1111-1111-111111111111"),
                         "Buffet",
                         ExpenseCategory.Alimentacao,
-                        2800
+                        2800,
+                        true
                     ),
                     new BudgetItem(
                         Guid.Parse("41111111-1111-1111-1111-111111111112"),
                         "Decoracao",
                         ExpenseCategory.Decoracao,
-                        1450
+                        1450,
+                        false
                     )
                 ]
             )
@@ -89,6 +91,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             Guid.Parse("31111111-1111-1111-1111-111111111111"),
             "Ana e familia",
             "Familia",
+            GuestType.Adulto,
             "Confirmado",
             "demo-ana-familia",
             "ana@example.com",
@@ -99,6 +102,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             Guid.Parse("31111111-1111-1111-1111-111111111112"),
             "Escola Arco-Iris",
             "Amigos da escola",
+            GuestType.Crianca,
             "Pendente",
             "demo-escola-arco-iris",
             string.Empty,

@@ -27,13 +27,13 @@ public static class PartyMappingExtensions
                 .Select(task => new PartyTaskResponse(task.Id, task.Title, task.Assignee, task.DueDate, task.Description, task.Status, task.Done))
                 .ToArray(),
             party.Guests
-                .Select(guest => new GuestResponse(guest.Id, guest.Name, guest.Group, guest.Status, guest.InvitationToken, guest.Email, guest.PhoneNumber))
+                .Select(guest => new GuestResponse(guest.Id, guest.Name, guest.Group, guest.Type, guest.Status, guest.InvitationToken, guest.Email, guest.PhoneNumber))
                 .ToArray(),
             new BudgetResponse(
                 party.Budget.Estimated,
                 party.Budget.Spent,
                 party.Budget.Items
-                    .Select(item => new BudgetItemResponse(item.Id, item.Label, item.Category, item.Amount))
+                    .Select(item => new BudgetItemResponse(item.Id, item.Label, item.Category, item.Amount, item.IsPaid))
                     .ToArray()
             )
         );

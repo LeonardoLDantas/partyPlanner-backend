@@ -49,6 +49,7 @@ public sealed class PartyConfiguration : IEntityTypeConfiguration<Party>
                 item.Property(current => current.Label).HasMaxLength(150).IsRequired();
                 item.Property(current => current.Category).HasConversion<string>().HasMaxLength(80).IsRequired();
                 item.Property(current => current.Amount).HasColumnType("decimal(18,2)");
+                item.Property(current => current.IsPaid).IsRequired();
             });
         });
     }

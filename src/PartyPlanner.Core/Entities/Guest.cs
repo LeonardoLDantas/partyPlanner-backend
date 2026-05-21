@@ -1,3 +1,5 @@
+using PartyPlanner.Core.Enums;
+
 namespace PartyPlanner.Core.Entities;
 
 public sealed class Guest
@@ -6,11 +8,12 @@ public sealed class Guest
     {
     }
 
-    public Guest(Guid id, string name, string group, string status, string invitationToken, string email, string phoneNumber)
+    public Guest(Guid id, string name, string group, GuestType type, string status, string invitationToken, string email, string phoneNumber)
     {
         Id = id;
         Name = name;
         Group = group;
+        Type = type;
         Status = status;
         InvitationToken = invitationToken;
         Email = email;
@@ -20,6 +23,7 @@ public sealed class Guest
     public Guid Id { get; private set; }
     public string Name { get; private set; } = string.Empty;
     public string Group { get; private set; } = string.Empty;
+    public GuestType Type { get; private set; }
     public string Status { get; private set; } = string.Empty;
     public string InvitationToken { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;

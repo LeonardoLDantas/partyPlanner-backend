@@ -224,6 +224,7 @@ public sealed class PartyService(
             Guid.NewGuid(),
             request.Name.Trim(),
             string.IsNullOrWhiteSpace(request.Group) ? "Geral" : request.Group.Trim(),
+            request.Type ?? GuestType.Adulto,
             "Pendente",
             CreateInvitationToken(),
             string.IsNullOrWhiteSpace(request.Email) ? string.Empty : request.Email.Trim(),
@@ -313,7 +314,8 @@ public sealed class PartyService(
             Guid.NewGuid(),
             request.Label.Trim(),
             request.Category ?? ExpenseCategory.Outros,
-            request.Amount);
+            request.Amount,
+            request.IsPaid);
 
         await partyRepository.AddBudgetItemAsync(party.Id, budgetItem, cancellationToken);
         await notificationService.CreateAsync(
@@ -337,7 +339,7 @@ public sealed class PartyService(
         }
 
         party.EnsureAcceptingChangesOn(GetCurrentBusinessDate());
-        await partyRepository.UpdateBudgetItemAsync(party.Id, budgetItemId, request.Amount, cancellationToken);
+        await partyRepository.UpdateBudgetItemAsync(party.Id, budgetItemId, request.Amount, request.IsPaid, cancellationToken);
         await notificationService.CreateAsync(
             ownerUserId,
             "Despesa atualizada",
