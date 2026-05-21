@@ -4,6 +4,7 @@ using PartyPlanner.Core.DTO.Responses;
 using PartyPlanner.Core.Entities;
 using PartyPlanner.Core.Enums;
 using PartyPlanner.Core.Extensions;
+using System.Globalization;
 
 namespace PartyPlanner.Application.Services;
 
@@ -38,6 +39,8 @@ public sealed class PartyService(
 
     public async Task<PartyResponse> CreateAsync(Guid ownerUserId, CreatePartyRequest request, CancellationToken cancellationToken = default)
     {
+        EnsureScheduleIsCurrentOrFuture(request.Date, request.Time);
+
         var party = new Party(
             Guid.NewGuid(),
             ownerUserId,
@@ -91,6 +94,28 @@ public sealed class PartyService(
             "party",
             cancellationToken);
         return party.ToResponse();
+    }
+
+    public async Task<bool> DeleteAsync(Guid ownerUserId, Guid partyId, CancellationToken cancellationToken = default)
+    {
+        var party = await partyRepository.GetByIdAsync(partyId, ownerUserId, cancellationToken);
+        if (party is null)
+        {
+            return false;
+        }
+
+        if (!await partyRepository.DeleteAsync(partyId, ownerUserId, cancellationToken))
+        {
+            return false;
+        }
+
+        await notificationService.CreateAsync(
+            ownerUserId,
+            "Festa excluida",
+            $"A festa \"{party.Name}\" foi excluida.",
+            "party",
+            cancellationToken);
+        return true;
     }
 
     public async Task<PartyResponse?> AddTaskAsync(Guid ownerUserId, Guid partyId, CreateTaskRequest request, CancellationToken cancellationToken = default)
@@ -376,12 +401,17 @@ public sealed class PartyService(
 
     private static DateOnly GetCurrentBusinessDate()
     {
+        return DateOnly.FromDateTime(GetCurrentBusinessDateTime());
+    }
+
+    private static DateTime GetCurrentBusinessDateTime()
+    {
         foreach (var timeZoneId in BusinessTimeZoneIds)
         {
             try
             {
                 var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
-                return DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone));
+                return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
             }
             catch (TimeZoneNotFoundException)
             {
@@ -391,7 +421,22 @@ public sealed class PartyService(
             }
         }
 
-        return DateOnly.FromDateTime(DateTime.UtcNow);
+        return DateTime.UtcNow;
+    }
+
+    private static void EnsureScheduleIsCurrentOrFuture(string? date, string? time)
+    {
+        if (!DateOnly.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var eventDate)
+            || !TimeOnly.TryParse(time, CultureInfo.InvariantCulture, DateTimeStyles.None, out var eventTime))
+        {
+            return;
+        }
+
+        var scheduledAt = eventDate.ToDateTime(eventTime);
+        if (scheduledAt < GetCurrentBusinessDateTime())
+        {
+            throw new InvalidOperationException("Informe uma data e um horario atuais ou futuros para a festa.");
+        }
     }
 
     private static string CreateInvitationToken()
