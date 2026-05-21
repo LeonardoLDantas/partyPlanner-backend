@@ -11,6 +11,10 @@ namespace PartyPlanner.WebApi.Controllers;
 [Route("api/[controller]")]
 public sealed class PartiesController(IPartyService partyService) : ControllerBase
 {
+    private const int MaximumExpectedGuests = 1_000_000;
+    private const int MaximumPartyLocationLength = 150;
+    private const decimal MaximumEstimatedBudget = 999_999_999_999m;
+
     private Guid GetUserId()
     {
         var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -40,8 +44,27 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
             return ValidationProblem(ModelState);
         }
 
-        var party = await partyService.CreateAsync(GetUserId(), request, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = party.Id }, party);
+        if (request.ExpectedGuests is > MaximumExpectedGuests)
+        {
+            ModelState.AddModelError(nameof(request.ExpectedGuests), "Informe no maximo 1.000.000 de convidados esperados.");
+            return ValidationProblem(ModelState);
+        }
+
+        if (!ValidatePartyLimits(request.Location, request.EstimatedBudget))
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        try
+        {
+            var party = await partyService.CreateAsync(GetUserId(), request, cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = party.Id }, party);
+        }
+        catch (InvalidOperationException exception)
+        {
+            ModelState.AddModelError(nameof(request.Date), exception.Message);
+            return ValidationProblem(ModelState);
+        }
     }
 
     [HttpPut("{id:guid}")]
@@ -50,6 +73,17 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
         if (string.IsNullOrWhiteSpace(request.Name))
         {
             ModelState.AddModelError(nameof(request.Name), "Name is required.");
+            return ValidationProblem(ModelState);
+        }
+
+        if (request.ExpectedGuests is > MaximumExpectedGuests)
+        {
+            ModelState.AddModelError(nameof(request.ExpectedGuests), "Informe no maximo 1.000.000 de convidados esperados.");
+            return ValidationProblem(ModelState);
+        }
+
+        if (!ValidatePartyLimits(request.Location, request.EstimatedBudget))
+        {
             return ValidationProblem(ModelState);
         }
 
@@ -63,6 +97,12 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
             ModelState.AddModelError(nameof(id), exception.Message);
             return ValidationProblem(ModelState);
         }
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        return await partyService.DeleteAsync(GetUserId(), id, cancellationToken) ? NoContent() : NotFound();
     }
 
     [HttpPost("{partyId:guid}/tasks")]
@@ -222,5 +262,20 @@ public sealed class PartiesController(IPartyService partyService) : ControllerBa
             ModelState.AddModelError(nameof(partyId), exception.Message);
             return ValidationProblem(ModelState);
         }
+    }
+
+    private bool ValidatePartyLimits(string? location, decimal? estimatedBudget)
+    {
+        if (location?.Trim().Length > MaximumPartyLocationLength)
+        {
+            ModelState.AddModelError(nameof(location), "Informe um local com no maximo 150 caracteres.");
+        }
+
+        if (estimatedBudget is < 0 or > MaximumEstimatedBudget)
+        {
+            ModelState.AddModelError(nameof(estimatedBudget), "Informe um orcamento estimado entre zero e R$ 999.999.999.999,00.");
+        }
+
+        return ModelState.IsValid;
     }
 }

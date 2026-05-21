@@ -41,6 +41,16 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
         await dbContext.Parties.AddAsync(party, cancellationToken);
     }
 
+    public async Task<bool> DeleteAsync(Guid id, Guid ownerUserId, CancellationToken cancellationToken = default)
+    {
+        var affectedRows = await dbContext.Parties
+            .Where(party => party.Id == id && party.OwnerUserId == ownerUserId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        dbContext.ChangeTracker.Clear();
+        return affectedRows > 0;
+    }
+
     public async Task AddTaskAsync(Guid partyId, PartyTask task, CancellationToken cancellationToken = default)
     {
         await dbContext.Tasks.AddAsync(task, cancellationToken);
