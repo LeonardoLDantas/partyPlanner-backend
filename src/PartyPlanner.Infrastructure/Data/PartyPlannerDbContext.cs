@@ -6,12 +6,12 @@ namespace PartyPlanner.Infrastructure.Data;
 
 public sealed class PartyPlannerDbContext(DbContextOptions<PartyPlannerDbContext> options) : DbContext(options)
 {
-    public DbSet<Party> Parties => Set<Party>();
-    public DbSet<PartyTask> Tasks => Set<PartyTask>();
-    public DbSet<Guest> Guests => Set<Guest>();
-    public DbSet<AppNotification> AppNotifications => Set<AppNotification>();
-    public DbSet<User> Users => Set<User>();
-    public DbSet<UserExternalLogin> UserExternalLogins => Set<UserExternalLogin>();
+    public DbSet<EntityParty> Parties => Set<EntityParty>();
+    public DbSet<EntityPartyTask> Tasks => Set<EntityPartyTask>();
+    public DbSet<EntityGuest> Guests => Set<EntityGuest>();
+    public DbSet<EntityAppNotification> AppNotifications => Set<EntityAppNotification>();
+    public DbSet<EntityUser> Users => Set<EntityUser>();
+    public DbSet<EntityUserExternalLogin> UserExternalLogins => Set<EntityUserExternalLogin>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

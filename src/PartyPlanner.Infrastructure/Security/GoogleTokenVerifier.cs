@@ -1,6 +1,6 @@
 using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
-using PartyPlanner.Application.Interface;
+using PartyPlanner.Application.Interfaces;
 
 namespace PartyPlanner.Infrastructure.Security;
 

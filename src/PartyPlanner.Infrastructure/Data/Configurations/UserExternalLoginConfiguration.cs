@@ -4,9 +4,9 @@ using PartyPlanner.Core.Entities;
 
 namespace PartyPlanner.Infrastructure.Data.Configurations;
 
-public sealed class UserExternalLoginConfiguration : IEntityTypeConfiguration<UserExternalLogin>
+public sealed class UserExternalLoginConfiguration : IEntityTypeConfiguration<EntityUserExternalLogin>
 {
-    public void Configure(EntityTypeBuilder<UserExternalLogin> builder)
+    public void Configure(EntityTypeBuilder<EntityUserExternalLogin> builder)
     {
         builder.ToTable("UserExternalLogins");
         builder.HasKey(login => login.Id);

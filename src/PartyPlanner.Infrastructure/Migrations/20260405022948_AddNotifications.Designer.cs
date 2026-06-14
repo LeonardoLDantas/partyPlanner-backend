@@ -25,7 +25,7 @@ namespace PartyPlanner.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.AppNotification", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityAppNotification", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,7 +62,7 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.ToTable("AppNotifications", (string)null);
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.Guest", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityGuest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -93,7 +93,7 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.ToTable("Guests", (string)null);
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.Party", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityParty", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -129,7 +129,7 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.ToTable("Parties", (string)null);
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.PartyTask", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityPartyTask", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -158,7 +158,7 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.ToTable("Tasks", (string)null);
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.User", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -193,7 +193,7 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.UserExternalLogin", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityUserExternalLogin", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -230,34 +230,34 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.ToTable("UserExternalLogins", (string)null);
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.AppNotification", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityAppNotification", b =>
                 {
-                    b.HasOne("PartyPlanner.Core.Entities.User", "User")
+                    b.HasOne("PartyPlanner.Core.Entities.EntityUser", "EntityUser")
                         .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("EntityUser");
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.Guest", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityGuest", b =>
                 {
-                    b.HasOne("PartyPlanner.Core.Entities.Party", null)
+                    b.HasOne("PartyPlanner.Core.Entities.EntityParty", null)
                         .WithMany("Guests")
                         .HasForeignKey("PartyId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.Party", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityParty", b =>
                 {
-                    b.HasOne("PartyPlanner.Core.Entities.User", "Owner")
+                    b.HasOne("PartyPlanner.Core.Entities.EntityUser", "Owner")
                         .WithMany("Parties")
                         .HasForeignKey("OwnerUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("PartyPlanner.Core.Entities.Budget", "Budget", b1 =>
+                    b.OwnsOne("PartyPlanner.Core.Entities.EntityBudget", "EntityBudget", b1 =>
                         {
                             b1.Property<Guid>("PartyId")
                                 .HasColumnType("uuid");
@@ -277,7 +277,7 @@ namespace PartyPlanner.Infrastructure.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("PartyId");
 
-                            b1.OwnsMany("PartyPlanner.Core.Entities.BudgetItem", "Items", b2 =>
+                            b1.OwnsMany("PartyPlanner.Core.Entities.EntityBudgetItem", "Items", b2 =>
                                 {
                                     b2.Property<Guid>("Id")
                                         .ValueGeneratedOnAdd()
@@ -312,39 +312,39 @@ namespace PartyPlanner.Infrastructure.Migrations
                             b1.Navigation("Items");
                         });
 
-                    b.Navigation("Budget")
+                    b.Navigation("EntityBudget")
                         .IsRequired();
 
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.PartyTask", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityPartyTask", b =>
                 {
-                    b.HasOne("PartyPlanner.Core.Entities.Party", null)
+                    b.HasOne("PartyPlanner.Core.Entities.EntityParty", null)
                         .WithMany("Tasks")
                         .HasForeignKey("PartyId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.UserExternalLogin", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityUserExternalLogin", b =>
                 {
-                    b.HasOne("PartyPlanner.Core.Entities.User", "User")
+                    b.HasOne("PartyPlanner.Core.Entities.EntityUser", "EntityUser")
                         .WithMany("ExternalLogins")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("EntityUser");
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.Party", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityParty", b =>
                 {
                     b.Navigation("Guests");
 
                     b.Navigation("Tasks");
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.User", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityUser", b =>
                 {
                     b.Navigation("ExternalLogins");
 

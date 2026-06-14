@@ -1,73 +1,41 @@
 using System.Security.Claims;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PartyPlanner.Application.Interface;
-using PartyPlanner.Core.DTO.Requests;
+using PartyPlanner.Application.Auth.Commands.Login;
+using PartyPlanner.Application.Auth.Commands.LoginWithGoogle;
+using PartyPlanner.Application.Auth.Commands.Register;
+using PartyPlanner.Application.Auth.Queries.GetProfile;
+using PartyPlanner.Application.DTOs.Requests;
 
 namespace PartyPlanner.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class AuthController(IAuthService authService) : ControllerBase
+public sealed class AuthController(IMediator mediator) : ControllerBase
 {
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-        {
-            ModelState.AddModelError(nameof(request.Email), "E-mail e senha sao obrigatorios.");
-            return ValidationProblem(ModelState);
-        }
-
-        try
-        {
-            var response = await authService.RegisterAsync(request, cancellationToken);
-            return Ok(response);
-        }
-        catch (InvalidOperationException exception)
-        {
-            return Conflict(new { message = exception.Message });
-        }
+        var command = new RegisterCommand(request.Name, request.Email, request.Password);
+        var response = await mediator.Send(command, cancellationToken);
+        return Ok(response);
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-        {
-            ModelState.AddModelError(nameof(request.Email), "E-mail e senha sao obrigatorios.");
-            return ValidationProblem(ModelState);
-        }
-
-        try
-        {
-            var response = await authService.LoginAsync(request, cancellationToken);
-            return Ok(response);
-        }
-        catch (UnauthorizedAccessException exception)
-        {
-            return Unauthorized(new { message = exception.Message });
-        }
+        var command = new LoginCommand(request.Email, request.Password);
+        var response = await mediator.Send(command, cancellationToken);
+        return Ok(response);
     }
 
     [HttpPost("google")]
     public async Task<IActionResult> Google([FromBody] GoogleLoginRequest request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.IdToken))
-        {
-            ModelState.AddModelError(nameof(request.IdToken), "O token do Google e obrigatorio.");
-            return ValidationProblem(ModelState);
-        }
-
-        try
-        {
-            var response = await authService.LoginWithGoogleAsync(request, cancellationToken);
-            return Ok(response);
-        }
-        catch (Exception exception) when (exception is InvalidOperationException or UnauthorizedAccessException)
-        {
-            return Unauthorized(new { message = exception.Message });
-        }
+        var command = new LoginWithGoogleCommand(request.IdToken);
+        var response = await mediator.Send(command, cancellationToken);
+        return Ok(response);
     }
 
     [Authorize]
@@ -75,12 +43,10 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
     public async Task<IActionResult> Me(CancellationToken cancellationToken)
     {
         var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdValue, out var userId))
-        {
-            return Unauthorized();
-        }
+        if (!Guid.TryParse(userIdValue, out var userId)) return Unauthorized();
 
-        var user = await authService.GetProfileAsync(userId, cancellationToken);
+        var query = new GetProfileQuery(userId);
+        var user = await mediator.Send(query, cancellationToken);
         return user is null ? Unauthorized() : Ok(user);
     }
 }

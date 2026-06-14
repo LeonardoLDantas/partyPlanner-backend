@@ -4,9 +4,9 @@ using PartyPlanner.Core.Entities;
 
 namespace PartyPlanner.Infrastructure.Data.Configurations;
 
-public sealed class AppNotificationConfiguration : IEntityTypeConfiguration<AppNotification>
+public sealed class AppNotificationConfiguration : IEntityTypeConfiguration<EntityAppNotification>
 {
-    public void Configure(EntityTypeBuilder<AppNotification> builder)
+    public void Configure(EntityTypeBuilder<EntityAppNotification> builder)
     {
         builder.ToTable("AppNotifications");
         builder.HasKey(notification => notification.Id);

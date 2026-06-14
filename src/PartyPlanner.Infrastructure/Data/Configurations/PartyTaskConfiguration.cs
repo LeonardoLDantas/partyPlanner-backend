@@ -4,9 +4,9 @@ using PartyPlanner.Core.Entities;
 
 namespace PartyPlanner.Infrastructure.Data.Configurations;
 
-public sealed class PartyTaskConfiguration : IEntityTypeConfiguration<PartyTask>
+public sealed class PartyTaskConfiguration : IEntityTypeConfiguration<EntityPartyTask>
 {
-    public void Configure(EntityTypeBuilder<PartyTask> builder)
+    public void Configure(EntityTypeBuilder<EntityPartyTask> builder)
     {
         builder.ToTable("Tasks");
         builder.HasKey(task => task.Id);

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using PartyPlanner.Application.Interface;
+using PartyPlanner.Core.Interfaces.Repositories;
 using PartyPlanner.Core.Entities;
 using PartyPlanner.Infrastructure.Data;
 
@@ -7,36 +7,36 @@ namespace PartyPlanner.Infrastructure.Repository;
 
 public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRepository
 {
-    public async Task<IReadOnlyCollection<Party>> GetAllAsync(Guid ownerUserId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<EntityParty>> GetAllAsync(Guid ownerUserId, CancellationToken cancellationToken = default)
     {
         return await dbContext.Parties
             .Where(party => party.OwnerUserId == ownerUserId)
             .Include(party => party.Tasks)
             .Include(party => party.Guests)
-            .Include(party => party.Budget.Items)
+            .Include(party => party.EntityBudget.Items)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Party?> GetByIdAsync(Guid id, Guid ownerUserId, CancellationToken cancellationToken = default)
+    public async Task<EntityParty?> GetByIdAsync(Guid id, Guid ownerUserId, CancellationToken cancellationToken = default)
     {
         return await dbContext.Parties
             .Where(party => party.OwnerUserId == ownerUserId)
             .Include(party => party.Tasks)
             .Include(party => party.Guests)
-            .Include(party => party.Budget.Items)
+            .Include(party => party.EntityBudget.Items)
             .FirstOrDefaultAsync(party => party.Id == id, cancellationToken);
     }
 
-    public async Task<Party?> GetByInvitationTokenAsync(string invitationToken, CancellationToken cancellationToken = default)
+    public async Task<EntityParty?> GetByInvitationTokenAsync(string invitationToken, CancellationToken cancellationToken = default)
     {
         return await dbContext.Parties
             .Include(party => party.Tasks)
             .Include(party => party.Guests)
-            .Include(party => party.Budget.Items)
+            .Include(party => party.EntityBudget.Items)
             .FirstOrDefaultAsync(party => party.Guests.Any(guest => guest.InvitationToken == invitationToken), cancellationToken);
     }
 
-    public async Task AddAsync(Party party, CancellationToken cancellationToken = default)
+    public async Task AddAsync(EntityParty party, CancellationToken cancellationToken = default)
     {
         await dbContext.Parties.AddAsync(party, cancellationToken);
     }
@@ -51,7 +51,7 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
         return affectedRows > 0;
     }
 
-    public async Task AddTaskAsync(Guid partyId, PartyTask task, CancellationToken cancellationToken = default)
+    public async Task AddTaskAsync(Guid partyId, EntityPartyTask task, CancellationToken cancellationToken = default)
     {
         await dbContext.Tasks.AddAsync(task, cancellationToken);
         dbContext.Entry(task).Property<Guid?>("PartyId").CurrentValue = partyId;
@@ -69,7 +69,7 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
         dbContext.ChangeTracker.Clear();
     }
 
-    public async Task AddGuestAsync(Guid partyId, Guest guest, CancellationToken cancellationToken = default)
+    public async Task AddGuestAsync(Guid partyId, EntityGuest guest, CancellationToken cancellationToken = default)
     {
         await dbContext.Guests.AddAsync(guest, cancellationToken);
         dbContext.Entry(guest).Property<Guid?>("PartyId").CurrentValue = partyId;
@@ -87,7 +87,7 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
         dbContext.ChangeTracker.Clear();
     }
 
-    public async Task AddBudgetItemAsync(Guid partyId, BudgetItem item, CancellationToken cancellationToken = default)
+    public async Task AddBudgetItemAsync(Guid partyId, EntityBudgetItem item, CancellationToken cancellationToken = default)
     {
         await dbContext.Database.ExecuteSqlInterpolatedAsync(
             $"""
@@ -152,10 +152,5 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
             cancellationToken);
 
         dbContext.ChangeTracker.Clear();
-    }
-
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        return dbContext.SaveChangesAsync(cancellationToken);
     }
 }

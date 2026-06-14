@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using PartyPlanner.Application.Interface;
+using PartyPlanner.Core.Interfaces.Repositories;
 using PartyPlanner.Core.Entities;
 using PartyPlanner.Infrastructure.Data;
 
@@ -7,7 +7,7 @@ namespace PartyPlanner.Infrastructure.Repository;
 
 public sealed class NotificationRepository(PartyPlannerDbContext dbContext) : INotificationRepository
 {
-    public async Task<IReadOnlyCollection<AppNotification>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<EntityAppNotification>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return await dbContext.AppNotifications
             .Where(notification => notification.UserId == userId)
@@ -15,7 +15,7 @@ public sealed class NotificationRepository(PartyPlannerDbContext dbContext) : IN
             .ToArrayAsync(cancellationToken);
     }
 
-    public Task<AppNotification?> GetByIdAsync(Guid notificationId, Guid userId, CancellationToken cancellationToken = default)
+    public Task<EntityAppNotification?> GetByIdAsync(Guid notificationId, Guid userId, CancellationToken cancellationToken = default)
     {
         return dbContext.AppNotifications
             .FirstOrDefaultAsync(
@@ -30,13 +30,8 @@ public sealed class NotificationRepository(PartyPlannerDbContext dbContext) : IN
             .ExecuteDeleteAsync(cancellationToken);
     }
 
-    public Task AddAsync(AppNotification notification, CancellationToken cancellationToken = default)
+    public Task AddAsync(EntityAppNotification notification, CancellationToken cancellationToken = default)
     {
         return dbContext.AppNotifications.AddAsync(notification, cancellationToken).AsTask();
-    }
-
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        return dbContext.SaveChangesAsync(cancellationToken);
     }
 }
