@@ -3,16 +3,16 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using PartyPlanner.Application.Interface;
-using PartyPlanner.Core.DTO.Responses;
+using PartyPlanner.Application.DTOs.Responses;
+using PartyPlanner.Application.Interfaces;
+using PartyPlanner.Application.Mappings;
 using PartyPlanner.Core.Entities;
-using PartyPlanner.Core.Extensions;
 
 namespace PartyPlanner.Infrastructure.Security;
 
 public sealed class JwtTokenService(IConfiguration configuration) : ITokenService
 {
-    public AuthResponse Create(User user)
+    public AuthResponse Create(EntityUser user)
     {
         var issuer = configuration["Jwt:Issuer"] ?? "PartyPlanner.Api";
         var audience = configuration["Jwt:Audience"] ?? "PartyPlanner.Mobile";

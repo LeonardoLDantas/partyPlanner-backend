@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PartyPlanner.Application\PartyPlanner.Application.csproj" />
-    <ProjectReference Include="..\PartyPlanner.Common\PartyPlanner.Common.csproj" />
     <ProjectReference Include="..\PartyPlanner.Core\PartyPlanner.Core.csproj" />
     <ProjectReference Include="..\PartyPlanner.Infrastructure\PartyPlanner.Infrastructure.csproj" />
   </ItemGroup>
@@ -25,6 +24,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.OpenApi" Version="2.4.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.4.1" />
   </ItemGroup>
 
 </Project>

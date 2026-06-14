@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PartyPlanner.Application\PartyPlanner.Application.csproj" />
-    <ProjectReference Include="..\PartyPlanner.Common\PartyPlanner.Common.csproj" />
     <ProjectReference Include="..\PartyPlanner.Core\PartyPlanner.Core.csproj" />
   </ItemGroup>
 
@@ -30,6 +29,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="Resend" Version="0.5.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.7.0" />
   </ItemGroup>
 

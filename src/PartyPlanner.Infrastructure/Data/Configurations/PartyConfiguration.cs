@@ -4,9 +4,9 @@ using PartyPlanner.Core.Entities;
 
 namespace PartyPlanner.Infrastructure.Data.Configurations;
 
-public sealed class PartyConfiguration : IEntityTypeConfiguration<Party>
+public sealed class PartyConfiguration : IEntityTypeConfiguration<EntityParty>
 {
-    public void Configure(EntityTypeBuilder<Party> builder)
+    public void Configure(EntityTypeBuilder<EntityParty> builder)
     {
         builder.ToTable("Parties");
         builder.HasKey(party => party.Id);
@@ -31,7 +31,7 @@ public sealed class PartyConfiguration : IEntityTypeConfiguration<Party>
             .HasForeignKey("PartyId")
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.OwnsOne(party => party.Budget, budget =>
+        builder.OwnsOne(party => party.EntityBudget, budget =>
         {
             budget.Property(current => current.Estimated)
                 .HasColumnName("BudgetEstimated")

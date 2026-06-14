@@ -4,9 +4,9 @@ using PartyPlanner.Core.Entities;
 
 namespace PartyPlanner.Infrastructure.Data.Configurations;
 
-public sealed class UserConfiguration : IEntityTypeConfiguration<User>
+public sealed class UserConfiguration : IEntityTypeConfiguration<EntityUser>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<EntityUser> builder)
     {
         builder.ToTable("Users");
         builder.HasKey(user => user.Id);
@@ -23,12 +23,12 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(user => user.ExternalLogins)
-            .WithOne(login => login.User)
+            .WithOne(login => login.EntityUser)
             .HasForeignKey(login => login.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(user => user.Notifications)
-            .WithOne(notification => notification.User)
+            .WithOne(notification => notification.EntityUser)
             .HasForeignKey(notification => notification.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }

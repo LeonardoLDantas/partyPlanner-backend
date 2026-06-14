@@ -4,9 +4,9 @@ using PartyPlanner.Core.Entities;
 
 namespace PartyPlanner.Infrastructure.Data.Configurations;
 
-public sealed class GuestConfiguration : IEntityTypeConfiguration<Guest>
+public sealed class GuestConfiguration : IEntityTypeConfiguration<EntityGuest>
 {
-    public void Configure(EntityTypeBuilder<Guest> builder)
+    public void Configure(EntityTypeBuilder<EntityGuest> builder)
     {
         builder.ToTable("Guests");
         builder.HasKey(guest => guest.Id);

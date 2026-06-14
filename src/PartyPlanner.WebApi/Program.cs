@@ -5,6 +5,18 @@ using Microsoft.IdentityModel.Tokens;
 using PartyPlanner.Application;
 using PartyPlanner.Infrastructure;
 using PartyPlanner.Infrastructure.Data;
+using PartyPlanner.WebApi.Middleware;
+
+AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+{
+    Console.Error.WriteLine($"[FATAL] UnhandledException: {e.ExceptionObject}");
+};
+
+TaskScheduler.UnobservedTaskException += (_, e) =>
+{
+    Console.Error.WriteLine($"[FATAL] UnobservedTaskException: {e.Exception}");
+    e.SetObserved();
+};
 
 var builder = WebApplication.CreateBuilder(args);
 var jwtKey = builder.Configuration["Jwt:Key"]
@@ -55,6 +67,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseCors();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 

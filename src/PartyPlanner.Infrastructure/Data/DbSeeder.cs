@@ -18,7 +18,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
         if (demoUser is null)
         {
             var passwordHasher = new Pbkdf2PasswordHasher();
-            demoUser = new User(
+            demoUser = new EntityUser(
                 demoUserId,
                 "Demo Party Planner",
                 "demo@partyplanner.app",
@@ -35,7 +35,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             return;
         }
 
-        var party = new Party(
+        var party = new EntityParty(
             Guid.Parse("11111111-1111-1111-1111-111111111111"),
             demoUser.Id,
             "Aniversario da Sofia",
@@ -45,18 +45,18 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             "Espaco Jardim Azul",
             "/illustrations/birthday-hero.svg",
             60,
-            new Budget(
+            new EntityBudget(
                 8500,
                 4250,
                 [
-                    new BudgetItem(
+                    new EntityBudgetItem(
                         Guid.Parse("41111111-1111-1111-1111-111111111111"),
                         "Buffet",
                         ExpenseCategory.Alimentacao,
                         2800,
                         true
                     ),
-                    new BudgetItem(
+                    new EntityBudgetItem(
                         Guid.Parse("41111111-1111-1111-1111-111111111112"),
                         "Decoracao",
                         ExpenseCategory.Decoracao,
@@ -67,7 +67,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             )
         );
 
-        party.AddTask(new PartyTask(
+        party.AddTask(new EntityPartyTask(
             Guid.Parse("21111111-1111-1111-1111-111111111111"),
             "Fechar buffet infantil",
             "Luiza",
@@ -77,7 +77,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             true
         ));
 
-        party.AddTask(new PartyTask(
+        party.AddTask(new EntityPartyTask(
             Guid.Parse("21111111-1111-1111-1111-111111111112"),
             "Confirmar decoracao tema sereia",
             "Marina",
@@ -87,7 +87,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             false
         ));
 
-        party.AddGuest(new Guest(
+        party.AddGuest(new EntityGuest(
             Guid.Parse("31111111-1111-1111-1111-111111111111"),
             "Ana e familia",
             "Familia",
@@ -98,7 +98,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             "5511999999999"
         ));
 
-        party.AddGuest(new Guest(
+        party.AddGuest(new EntityGuest(
             Guid.Parse("31111111-1111-1111-1111-111111111112"),
             "Escola Arco-Iris",
             "Amigos da escola",
