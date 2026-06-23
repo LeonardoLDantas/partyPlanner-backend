@@ -8,7 +8,7 @@ public sealed record AddGuestCommand(
     Guid OwnerUserId,
     Guid PartyId,
     string Name,
-    string? Group,
+    GuestGroup? Group,
     GuestType? Type,
     string? Email,
     string? PhoneNumber) : IRequest<PartyResponse?>;

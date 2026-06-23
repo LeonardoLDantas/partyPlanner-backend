@@ -90,7 +90,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
         party.AddGuest(new EntityGuest(
             Guid.Parse("31111111-1111-1111-1111-111111111111"),
             "Ana e familia",
-            "Familia",
+            GuestGroup.Familia,
             GuestType.Adulto,
             "Confirmado",
             "demo-ana-familia",
@@ -101,7 +101,7 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
         party.AddGuest(new EntityGuest(
             Guid.Parse("31111111-1111-1111-1111-111111111112"),
             "Escola Arco-Iris",
-            "Amigos da escola",
+            GuestGroup.Escola,
             GuestType.Crianca,
             "Pendente",
             "demo-escola-arco-iris",

@@ -11,7 +11,7 @@ public sealed class GuestConfiguration : IEntityTypeConfiguration<EntityGuest>
         builder.ToTable("Guests");
         builder.HasKey(guest => guest.Id);
         builder.Property(guest => guest.Name).HasMaxLength(150).IsRequired();
-        builder.Property(guest => guest.Group).HasMaxLength(100).IsRequired();
+        builder.Property(guest => guest.Group).HasConversion<int>().IsRequired();
         builder.Property(guest => guest.Type).HasConversion<string>().HasMaxLength(30).IsRequired();
         builder.Property(guest => guest.Status).HasMaxLength(40).IsRequired();
         builder.Property(guest => guest.InvitationToken).HasMaxLength(80).IsRequired();

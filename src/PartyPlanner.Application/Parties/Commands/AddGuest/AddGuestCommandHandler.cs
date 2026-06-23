@@ -25,7 +25,7 @@ public sealed class AddGuestCommandHandler(
         var guest = new EntityGuest(
             Guid.NewGuid(),
             request.Name.Trim(),
-            string.IsNullOrWhiteSpace(request.Group) ? "Geral" : request.Group.Trim(),
+            request.Group ?? GuestGroup.Outros,
             request.Type ?? GuestType.Adulto,
             "Pendente",
             CreateInvitationToken(),
