@@ -5,7 +5,7 @@ namespace PartyPlanner.Application.DTOs.Responses;
 public sealed record GuestResponse(
     Guid Id,
     string Name,
-    string Group,
+    GuestGroup Group,
     GuestType Type,
     string Status,
     string InvitationToken,

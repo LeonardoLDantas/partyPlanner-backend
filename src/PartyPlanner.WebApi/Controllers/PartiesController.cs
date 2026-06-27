@@ -4,18 +4,21 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PartyPlanner.Application.DTOs.Requests;
 using PartyPlanner.Application.Parties.Commands.AddBudgetItem;
-using PartyPlanner.Application.Parties.Commands.AddGuest;
+using PartyPlanner.Application.Parties.Commands.AddGuestToConvite;
 using PartyPlanner.Application.Parties.Commands.AddTask;
+using PartyPlanner.Application.Parties.Commands.CreateConvite;
 using PartyPlanner.Application.Parties.Commands.CreateParty;
 using PartyPlanner.Application.Parties.Commands.DeleteBudgetItem;
-using PartyPlanner.Application.Parties.Commands.DeleteGuest;
+using PartyPlanner.Application.Parties.Commands.DeleteConvite;
+using PartyPlanner.Application.Parties.Commands.DeleteGuestFromConvite;
 using PartyPlanner.Application.Parties.Commands.DeleteParty;
 using PartyPlanner.Application.Parties.Commands.DeleteTask;
 using PartyPlanner.Application.Parties.Commands.ToggleTask;
 using PartyPlanner.Application.Parties.Commands.UpdateBudgetItem;
+using PartyPlanner.Application.Parties.Commands.UpdateConvite;
+using PartyPlanner.Application.Parties.Commands.UpdateGuest;
 using PartyPlanner.Application.Parties.Commands.UpdateParty;
 using PartyPlanner.Application.Parties.Commands.UpdateTask;
-using PartyPlanner.Application.Parties.Commands.SendInvitation;
 using PartyPlanner.Application.Parties.Queries.GetAllParties;
 using PartyPlanner.Application.Parties.Queries.GetPartyById;
 
@@ -47,7 +50,7 @@ public sealed class PartiesController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost]
-    [RequestSizeLimit(52_428_800)] // 50 MB — suporta CoverImageUrl como base64
+    [RequestSizeLimit(52_428_800)]
     public async Task<IActionResult> Create([FromBody] CreatePartyRequest request, CancellationToken cancellationToken)
     {
         var command = new CreatePartyCommand(GetUserId(), request.Name, request.Category, request.Date, request.Time, request.Location, request.CoverImageUrl, request.ExpectedGuests, request.EstimatedBudget, request.IsFinalized);
@@ -56,7 +59,7 @@ public sealed class PartiesController(IMediator mediator) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [RequestSizeLimit(52_428_800)] // 50 MB — suporta CoverImageUrl como base64
+    [RequestSizeLimit(52_428_800)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePartyRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdatePartyCommand(GetUserId(), id, request.Name, request.Category, request.Date, request.Time, request.Location, request.CoverImageUrl, request.ExpectedGuests, request.EstimatedBudget, request.IsFinalized);
@@ -70,6 +73,8 @@ public sealed class PartiesController(IMediator mediator) : ControllerBase
         var deleted = await mediator.Send(new DeletePartyCommand(GetUserId(), id), cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
+
+    // ── Tasks ──────────────────────────────────────────────────────────────
 
     [HttpPost("{partyId:guid}/tasks")]
     public async Task<IActionResult> AddTask(Guid partyId, [FromBody] CreateTaskRequest request, CancellationToken cancellationToken)
@@ -87,7 +92,7 @@ public sealed class PartiesController(IMediator mediator) : ControllerBase
     }
 
     [HttpPatch("{partyId:guid}/tasks/{taskId:guid}")]
-    public async Task<IActionResult> UpdateTaskStatus(Guid partyId, Guid taskId, [FromBody] UpdateTaskRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateTask(Guid partyId, Guid taskId, [FromBody] UpdateTaskRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateTaskCommand(GetUserId(), partyId, taskId, request.Title, request.Assignee, request.Description, request.Status);
         var party = await mediator.Send(command, cancellationToken);
@@ -101,27 +106,57 @@ public sealed class PartiesController(IMediator mediator) : ControllerBase
         return party is null ? NotFound() : Ok(party);
     }
 
-    [HttpPost("{partyId:guid}/guests")]
-    public async Task<IActionResult> AddGuest(Guid partyId, [FromBody] CreateGuestRequest request, CancellationToken cancellationToken)
+    // ── Convites ───────────────────────────────────────────────────────────
+
+    [HttpPost("{partyId:guid}/convites")]
+    public async Task<IActionResult> CreateConvite(Guid partyId, [FromBody] CreateConviteRequest request, CancellationToken cancellationToken)
     {
-        var command = new AddGuestCommand(GetUserId(), partyId, request.Name, request.Group, request.Type, request.Email, request.PhoneNumber);
+        var command = new CreateConviteCommand(GetUserId(), partyId, request.Nome, request.Observacao, request.Tipo, request.QuantidadeSenhas, request.SenhaPresente);
         var party = await mediator.Send(command, cancellationToken);
         return party is null ? NotFound() : Ok(party);
     }
 
-    [HttpDelete("{partyId:guid}/guests/{guestId:guid}")]
-    public async Task<IActionResult> DeleteGuest(Guid partyId, Guid guestId, CancellationToken cancellationToken)
+    [HttpPut("{partyId:guid}/convites/{conviteId:guid}")]
+    public async Task<IActionResult> UpdateConvite(Guid partyId, Guid conviteId, [FromBody] UpdateConviteRequest request, CancellationToken cancellationToken)
     {
-        var party = await mediator.Send(new DeleteGuestCommand(GetUserId(), partyId, guestId), cancellationToken);
+        var command = new UpdateConviteCommand(GetUserId(), partyId, conviteId, request.Nome, request.Observacao, request.Tipo, request.SenhaPresente);
+        var party = await mediator.Send(command, cancellationToken);
         return party is null ? NotFound() : Ok(party);
     }
 
-    [HttpPost("{partyId:guid}/guests/{guestId:guid}/send-invitation")]
-    public async Task<IActionResult> SendInvitation(Guid partyId, Guid guestId, CancellationToken cancellationToken)
+    [HttpDelete("{partyId:guid}/convites/{conviteId:guid}")]
+    public async Task<IActionResult> DeleteConvite(Guid partyId, Guid conviteId, CancellationToken cancellationToken)
     {
-        await mediator.Send(new SendInvitationCommand(GetUserId(), partyId, guestId), cancellationToken);
-        return NoContent();
+        var party = await mediator.Send(new DeleteConviteCommand(GetUserId(), partyId, conviteId), cancellationToken);
+        return party is null ? NotFound() : Ok(party);
     }
+
+    // ── Guests (dentro de Convite) ──────────────────────────────────────────
+
+    [HttpPost("{partyId:guid}/convites/{conviteId:guid}/guests")]
+    public async Task<IActionResult> AddGuest(Guid partyId, Guid conviteId, [FromBody] CreateGuestRequest request, CancellationToken cancellationToken)
+    {
+        var command = new AddGuestToConviteCommand(GetUserId(), partyId, conviteId, request.Name, request.Group, request.Type, request.Email, request.PhoneNumber);
+        var party = await mediator.Send(command, cancellationToken);
+        return party is null ? NotFound() : Ok(party);
+    }
+
+    [HttpPut("{partyId:guid}/convites/{conviteId:guid}/guests/{guestId:guid}")]
+    public async Task<IActionResult> UpdateGuest(Guid partyId, Guid conviteId, Guid guestId, [FromBody] UpdateGuestRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateGuestCommand(GetUserId(), partyId, conviteId, guestId, request.Name, request.Group, request.Type, request.Email, request.PhoneNumber);
+        var party = await mediator.Send(command, cancellationToken);
+        return party is null ? NotFound() : Ok(party);
+    }
+
+    [HttpDelete("{partyId:guid}/convites/{conviteId:guid}/guests/{guestId:guid}")]
+    public async Task<IActionResult> DeleteGuest(Guid partyId, Guid conviteId, Guid guestId, CancellationToken cancellationToken)
+    {
+        var party = await mediator.Send(new DeleteGuestFromConviteCommand(GetUserId(), partyId, conviteId, guestId), cancellationToken);
+        return party is null ? NotFound() : Ok(party);
+    }
+
+    // ── Budget Items ───────────────────────────────────────────────────────
 
     [HttpPost("{partyId:guid}/budget-items")]
     public async Task<IActionResult> AddBudgetItem(Guid partyId, [FromBody] CreateBudgetItemRequest request, CancellationToken cancellationToken)

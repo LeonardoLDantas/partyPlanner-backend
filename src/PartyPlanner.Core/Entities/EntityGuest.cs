@@ -10,7 +10,7 @@ public sealed class EntityGuest
     {
     }
 
-    public EntityGuest(Guid id, string name, string group, GuestType type, string status, string invitationToken, string email, string phoneNumber)
+    public EntityGuest(Guid id, string name, GuestGroup group, GuestType type, string status, string invitationToken, string email, string phoneNumber)
     {
         Id = id;
         Name = name;
@@ -24,7 +24,7 @@ public sealed class EntityGuest
 
     public Guid Id { get; private set; }
     public string Name { get; private set; } = string.Empty;
-    public string Group { get; private set; } = string.Empty;
+    public GuestGroup Group { get; private set; }
     public GuestType Type { get; private set; }
     public string Status { get; private set; } = string.Empty;
     public string InvitationToken { get; private set; } = string.Empty;
@@ -34,5 +34,14 @@ public sealed class EntityGuest
     public void UpdateStatus(string status)
     {
         Status = status;
+    }
+
+    public void UpdateDetails(string name, GuestGroup group, GuestType type, string email, string phoneNumber)
+    {
+        Name = name;
+        Group = group;
+        Type = type;
+        Email = email;
+        PhoneNumber = phoneNumber;
     }
 }

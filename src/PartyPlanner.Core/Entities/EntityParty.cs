@@ -56,7 +56,7 @@ public sealed class EntityParty
     public int ExpectedGuests { get; private set; }
     public bool IsFinalized { get; private set; }
     public List<EntityPartyTask> Tasks { get; private set; } = [];
-    public List<EntityGuest> Guests { get; private set; } = [];
+    public List<EntityConvite> Convites { get; private set; } = [];
     public EntityBudget EntityBudget { get; private set; }
     public EntityUser Owner { get; private set; } = null!;
 
@@ -65,9 +65,9 @@ public sealed class EntityParty
         Tasks.Insert(0, task);
     }
 
-    public void AddGuest(EntityGuest guest)
+    public void AddConvite(EntityConvite convite)
     {
-        Guests.Insert(0, guest);
+        Convites.Insert(0, convite);
     }
 
     public bool ToggleTask(Guid taskId)

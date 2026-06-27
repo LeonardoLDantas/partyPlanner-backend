@@ -59,10 +59,38 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.ToTable("AppNotifications", (string)null);
                 });
 
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityConvite", b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("Nome").IsRequired().HasMaxLength(150).HasColumnType("character varying(150)");
+                    b.Property<string>("Observacao").IsRequired().HasMaxLength(500).HasColumnType("character varying(500)");
+                    b.Property<Guid?>("PartyId").HasColumnType("uuid");
+                    b.Property<string>("SenhaPresente").IsRequired().HasMaxLength(80).HasColumnType("character varying(80)");
+                    b.Property<int>("Tipo").HasColumnType("integer");
+                    b.HasKey("Id");
+                    b.HasIndex("PartyId");
+                    b.ToTable("Convites", (string)null);
+                });
+
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityConviteSenha", b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<string>("Codigo").IsRequired().HasMaxLength(20).HasColumnType("character varying(20)");
+                    b.Property<Guid?>("ConviteId").HasColumnType("uuid");
+                    b.HasKey("Id");
+                    b.HasIndex("Codigo").IsUnique();
+                    b.HasIndex("ConviteId");
+                    b.ToTable("ConviteSenhas", (string)null);
+                });
+
             modelBuilder.Entity("PartyPlanner.Core.Entities.EntityGuest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ConviteId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Email")
@@ -70,10 +98,8 @@ namespace PartyPlanner.Infrastructure.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("character varying(160)");
 
-                    b.Property<string>("Group")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                    b.Property<int>("Group")
+                        .HasColumnType("integer");
 
                     b.Property<string>("InvitationToken")
                         .IsRequired()
@@ -84,9 +110,6 @@ namespace PartyPlanner.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
-
-                    b.Property<Guid?>("PartyId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -105,10 +128,10 @@ namespace PartyPlanner.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ConviteId");
+
                     b.HasIndex("InvitationToken")
                         .IsUnique();
-
-                    b.HasIndex("PartyId");
 
                     b.ToTable("Guests", (string)null);
                 });
@@ -289,11 +312,27 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.Navigation("EntityUser");
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityGuest", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityConvite", b =>
                 {
                     b.HasOne("PartyPlanner.Core.Entities.EntityParty", null)
-                        .WithMany("Guests")
+                        .WithMany("Convites")
                         .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityConviteSenha", b =>
+                {
+                    b.HasOne("PartyPlanner.Core.Entities.EntityConvite", null)
+                        .WithMany("Senhas")
+                        .HasForeignKey("ConviteId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityGuest", b =>
+                {
+                    b.HasOne("PartyPlanner.Core.Entities.EntityConvite", null)
+                        .WithMany("Guests")
+                        .HasForeignKey("ConviteId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -388,9 +427,15 @@ namespace PartyPlanner.Infrastructure.Migrations
                     b.Navigation("EntityUser");
                 });
 
-            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityParty", b =>
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityConvite", b =>
                 {
                     b.Navigation("Guests");
+                    b.Navigation("Senhas");
+                });
+
+            modelBuilder.Entity("PartyPlanner.Core.Entities.EntityParty", b =>
+                {
+                    b.Navigation("Convites");
 
                     b.Navigation("Tasks");
                 });

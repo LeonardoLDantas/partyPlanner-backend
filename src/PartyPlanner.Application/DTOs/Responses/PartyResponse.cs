@@ -15,6 +15,6 @@ public sealed record PartyResponse(
     bool IsFinalized,
     bool CanEdit,
     IReadOnlyCollection<PartyTaskResponse> Tasks,
-    IReadOnlyCollection<GuestResponse> Guests,
+    IReadOnlyCollection<ConviteResponse> Convites,
     BudgetResponse Budget
 );
