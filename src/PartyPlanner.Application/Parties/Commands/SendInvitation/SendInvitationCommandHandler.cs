@@ -15,7 +15,7 @@ public sealed class SendInvitationCommandHandler(
         var party = await partyRepository.GetByIdAsync(request.PartyId, request.OwnerUserId, cancellationToken);
         if (party is null) return;
 
-        var guest = party.Guests.FirstOrDefault(g => g.Id == request.GuestId);
+        var guest = party.Convites.SelectMany(c => c.Guests).FirstOrDefault(g => g.Id == request.GuestId);
         if (guest is null || string.IsNullOrWhiteSpace(guest.Email)) return;
 
         var link = $"{AppBaseUrl}/convite/{guest.InvitationToken}";

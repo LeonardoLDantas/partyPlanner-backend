@@ -15,7 +15,7 @@ public sealed class RespondInvitationCommandHandler(
     public async Task<InvitationResponse?> Handle(RespondInvitationCommand request, CancellationToken cancellationToken)
     {
         var party = await partyRepository.GetByInvitationTokenAsync(request.Token, cancellationToken);
-        var guest = party?.Guests.FirstOrDefault(g => g.InvitationToken == request.Token);
+        var guest = party?.Convites.SelectMany(c => c.Guests).FirstOrDefault(g => g.InvitationToken == request.Token);
         if (party is null || guest is null) return null;
 
         var status = NormalizeInvitationStatus(request.Status);

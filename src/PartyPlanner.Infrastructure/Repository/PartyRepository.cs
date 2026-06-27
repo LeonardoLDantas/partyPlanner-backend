@@ -12,7 +12,10 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
         return await dbContext.Parties
             .Where(party => party.OwnerUserId == ownerUserId)
             .Include(party => party.Tasks)
-            .Include(party => party.Guests)
+            .Include(party => party.Convites)
+                .ThenInclude(c => c.Senhas)
+            .Include(party => party.Convites)
+                .ThenInclude(c => c.Guests)
             .Include(party => party.EntityBudget.Items)
             .ToListAsync(cancellationToken);
     }
@@ -22,7 +25,10 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
         return await dbContext.Parties
             .Where(party => party.OwnerUserId == ownerUserId)
             .Include(party => party.Tasks)
-            .Include(party => party.Guests)
+            .Include(party => party.Convites)
+                .ThenInclude(c => c.Senhas)
+            .Include(party => party.Convites)
+                .ThenInclude(c => c.Guests)
             .Include(party => party.EntityBudget.Items)
             .FirstOrDefaultAsync(party => party.Id == id, cancellationToken);
     }
@@ -31,9 +37,14 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
     {
         return await dbContext.Parties
             .Include(party => party.Tasks)
-            .Include(party => party.Guests)
+            .Include(party => party.Convites)
+                .ThenInclude(c => c.Senhas)
+            .Include(party => party.Convites)
+                .ThenInclude(c => c.Guests)
             .Include(party => party.EntityBudget.Items)
-            .FirstOrDefaultAsync(party => party.Guests.Any(guest => guest.InvitationToken == invitationToken), cancellationToken);
+            .FirstOrDefaultAsync(
+                party => party.Convites.Any(c => c.Guests.Any(g => g.InvitationToken == invitationToken)),
+                cancellationToken);
     }
 
     public async Task AddAsync(EntityParty party, CancellationToken cancellationToken = default)
@@ -69,18 +80,36 @@ public sealed class PartyRepository(PartyPlannerDbContext dbContext) : IPartyRep
         dbContext.ChangeTracker.Clear();
     }
 
-    public async Task AddGuestAsync(Guid partyId, EntityGuest guest, CancellationToken cancellationToken = default)
+    public async Task AddConviteAsync(Guid partyId, EntityConvite convite, CancellationToken cancellationToken = default)
     {
-        await dbContext.Guests.AddAsync(guest, cancellationToken);
-        dbContext.Entry(guest).Property<Guid?>("PartyId").CurrentValue = partyId;
+        await dbContext.Convites.AddAsync(convite, cancellationToken);
+        dbContext.Entry(convite).Property<Guid?>("PartyId").CurrentValue = partyId;
     }
 
-    public async Task DeleteGuestAsync(Guid partyId, Guid guestId, CancellationToken cancellationToken = default)
+    public async Task DeleteConviteAsync(Guid partyId, Guid conviteId, CancellationToken cancellationToken = default)
+    {
+        await dbContext.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             DELETE FROM "Convites"
+             WHERE "Id" = {conviteId} AND "PartyId" = {partyId}
+             """,
+            cancellationToken);
+
+        dbContext.ChangeTracker.Clear();
+    }
+
+    public async Task AddGuestToConviteAsync(Guid conviteId, EntityGuest guest, CancellationToken cancellationToken = default)
+    {
+        await dbContext.Guests.AddAsync(guest, cancellationToken);
+        dbContext.Entry(guest).Property<Guid?>("ConviteId").CurrentValue = conviteId;
+    }
+
+    public async Task DeleteGuestFromConviteAsync(Guid conviteId, Guid guestId, CancellationToken cancellationToken = default)
     {
         await dbContext.Database.ExecuteSqlInterpolatedAsync(
             $"""
              DELETE FROM "Guests"
-             WHERE "Id" = {guestId} AND "PartyId" = {partyId}
+             WHERE "Id" = {guestId} AND "ConviteId" = {conviteId}
              """,
             cancellationToken);
 

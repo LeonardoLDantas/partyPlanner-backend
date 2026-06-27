@@ -87,7 +87,16 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             false
         ));
 
-        party.AddGuest(new EntityGuest(
+        var conviteFamilia = new EntityConvite(
+            Guid.Parse("51111111-1111-1111-1111-111111111111"),
+            "Familia",
+            "Convite para familiares proximos.",
+            InviteType.Familia,
+            null
+        );
+        conviteFamilia.AddSenha(new EntityConviteSenha(Guid.Parse("61111111-1111-1111-1111-111111111111"), "FAM001AB"));
+        conviteFamilia.AddSenha(new EntityConviteSenha(Guid.Parse("61111111-1111-1111-1111-111111111112"), "FAM002CD"));
+        conviteFamilia.AddGuest(new EntityGuest(
             Guid.Parse("31111111-1111-1111-1111-111111111111"),
             "Ana e familia",
             GuestGroup.Familia,
@@ -98,7 +107,15 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             "5511999999999"
         ));
 
-        party.AddGuest(new EntityGuest(
+        var conviteEscola = new EntityConvite(
+            Guid.Parse("51111111-1111-1111-1111-111111111112"),
+            "Turma Escola Arco-Iris",
+            null,
+            InviteType.Amigos,
+            null
+        );
+        conviteEscola.AddSenha(new EntityConviteSenha(Guid.Parse("61111111-1111-1111-1111-111111111113"), "ESC001XY"));
+        conviteEscola.AddGuest(new EntityGuest(
             Guid.Parse("31111111-1111-1111-1111-111111111112"),
             "Escola Arco-Iris",
             GuestGroup.Escola,
@@ -108,6 +125,9 @@ public sealed class DbSeeder(PartyPlannerDbContext dbContext)
             string.Empty,
             string.Empty
         ));
+
+        party.AddConvite(conviteFamilia);
+        party.AddConvite(conviteEscola);
 
         await dbContext.Parties.AddAsync(party, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);

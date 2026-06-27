@@ -8,6 +8,8 @@ public sealed class PartyPlannerDbContext(DbContextOptions<PartyPlannerDbContext
 {
     public DbSet<EntityParty> Parties => Set<EntityParty>();
     public DbSet<EntityPartyTask> Tasks => Set<EntityPartyTask>();
+    public DbSet<EntityConvite> Convites => Set<EntityConvite>();
+    public DbSet<EntityConviteSenha> ConviteSenhas => Set<EntityConviteSenha>();
     public DbSet<EntityGuest> Guests => Set<EntityGuest>();
     public DbSet<EntityAppNotification> AppNotifications => Set<EntityAppNotification>();
     public DbSet<EntityUser> Users => Set<EntityUser>();
@@ -17,6 +19,8 @@ public sealed class PartyPlannerDbContext(DbContextOptions<PartyPlannerDbContext
     {
         modelBuilder.ApplyConfiguration(new PartyConfiguration());
         modelBuilder.ApplyConfiguration(new PartyTaskConfiguration());
+        modelBuilder.ApplyConfiguration(new ConviteConfiguration());
+        modelBuilder.ApplyConfiguration(new ConviteSenhaConfiguration());
         modelBuilder.ApplyConfiguration(new GuestConfiguration());
         modelBuilder.ApplyConfiguration(new AppNotificationConfiguration());
         modelBuilder.ApplyConfiguration(new UserConfiguration());

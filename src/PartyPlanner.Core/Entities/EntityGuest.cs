@@ -35,4 +35,13 @@ public sealed class EntityGuest
     {
         Status = status;
     }
+
+    public void UpdateDetails(string name, GuestGroup group, GuestType type, string email, string phoneNumber)
+    {
+        Name = name;
+        Group = group;
+        Type = type;
+        Email = email;
+        PhoneNumber = phoneNumber;
+    }
 }

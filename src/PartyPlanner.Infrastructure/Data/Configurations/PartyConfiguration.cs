@@ -26,7 +26,7 @@ public sealed class PartyConfiguration : IEntityTypeConfiguration<EntityParty>
             .HasForeignKey("PartyId")
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(party => party.Guests)
+        builder.HasMany(party => party.Convites)
             .WithOne()
             .HasForeignKey("PartyId")
             .OnDelete(DeleteBehavior.Cascade);
