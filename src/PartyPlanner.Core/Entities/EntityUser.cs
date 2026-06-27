@@ -36,6 +36,11 @@ public sealed class EntityUser
         IsEmailConfirmed = true;
     }
 
+    public void UpdatePasswordHash(string newHash)
+    {
+        PasswordHash = newHash;
+    }
+
     public void AddExternalLogin(EntityUserExternalLogin login)
     {
         var existing = ExternalLogins.FirstOrDefault(current =>

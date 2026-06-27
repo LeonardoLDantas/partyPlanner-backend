@@ -14,6 +14,7 @@ public sealed class PartyPlannerDbContext(DbContextOptions<PartyPlannerDbContext
     public DbSet<EntityAppNotification> AppNotifications => Set<EntityAppNotification>();
     public DbSet<EntityUser> Users => Set<EntityUser>();
     public DbSet<EntityUserExternalLogin> UserExternalLogins => Set<EntityUserExternalLogin>();
+    public DbSet<EntityPasswordResetToken> PasswordResetTokens => Set<EntityPasswordResetToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,5 +26,6 @@ public sealed class PartyPlannerDbContext(DbContextOptions<PartyPlannerDbContext
         modelBuilder.ApplyConfiguration(new AppNotificationConfiguration());
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new UserExternalLoginConfiguration());
+        modelBuilder.ApplyConfiguration(new PasswordResetTokenConfiguration());
     }
 }

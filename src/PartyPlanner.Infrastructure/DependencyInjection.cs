@@ -8,8 +8,8 @@ using PartyPlanner.Infrastructure.Data;
 using PartyPlanner.Infrastructure.Email;
 using PartyPlanner.Infrastructure.Repository;
 using PartyPlanner.Infrastructure.Security;
+using PartyPlanner.Application.Common;
 using PartyPlanner.Infrastructure.Services;
-using Resend;
 
 namespace PartyPlanner.Infrastructure;
 
@@ -34,9 +34,14 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, BrazilDateTimeProvider>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Resend e-mail
-        services.AddResend(configuration["Resend:ApiToken"]!);
-        services.AddScoped<IEmailSender, ResendEmailSender>();
+        // App options
+        var appOptions = configuration.GetSection("App").Get<AppOptions>() ?? new AppOptions();
+        services.AddSingleton(appOptions);
+
+        // Gmail SMTP
+        var fromEmail = configuration["Email:FromAddress"]!;
+        var appPassword = configuration["Email:AppPassword"]!;
+        services.AddScoped<IEmailSender>(_ => new GmailEmailSender(fromEmail, appPassword));
 
         return services;
     }
