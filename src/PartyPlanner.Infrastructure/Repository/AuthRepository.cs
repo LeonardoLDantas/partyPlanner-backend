@@ -36,4 +36,15 @@ public sealed class AuthRepository(PartyPlannerDbContext dbContext) : IAuthRepos
     {
         return dbContext.Users.AddAsync(user, cancellationToken).AsTask();
     }
+
+    public Task AddPasswordResetTokenAsync(EntityPasswordResetToken token, CancellationToken cancellationToken = default)
+    {
+        return dbContext.PasswordResetTokens.AddAsync(token, cancellationToken).AsTask();
+    }
+
+    public Task<EntityPasswordResetToken?> GetPasswordResetTokenAsync(string token, CancellationToken cancellationToken = default)
+    {
+        return dbContext.PasswordResetTokens
+            .FirstOrDefaultAsync(t => t.Token == token, cancellationToken);
+    }
 }
